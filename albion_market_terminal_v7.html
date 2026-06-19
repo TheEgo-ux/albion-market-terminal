@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Albion Market Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── VARIABLES ── */
+:root{
+  --bg:#F2EAE0; --card:#E8DCCE; --deep:#DACABA; --brd:#C8B49C;
+  --acc:#B86A3E; --acd:#9E562E; --txt:#3C2E24; --mut:#8A7A6A;
+  --pro:#2D7A4F; --pb:#D4EDDA; --los:#B84040; --lb:#FADDDD;
+  --gld:#C8962A; --gb:#FFF4D4; --blu:#1565C0; --bb:#DDEEFF;
+  --shd:rgba(70,45,20,.08); --shd2:rgba(70,45,20,.14);
+  --r:12px; --rs:7px; --nav:60px;
+  --f:'Sora',sans-serif; --m:'IBM Plex Mono',monospace;
+}
+.dark{
+  --bg:#1C1410; --card:#261E1A; --deep:#302822; --brd:#3D342E;
+  --acc:#C0734A; --acd:#D48355; --txt:#D0C8BE; --mut:#8A7A6A;
+  --pro:#4CAF50; --pb:#1B3A2A; --los:#EF5350; --lb:#3A1B1B;
+  --gld:#E6A817; --gb:#3A2E12; --blu:#42A5F5; --bb:#122A3A;
+  --shd:rgba(0,0,0,.3); --shd2:rgba(0,0,0,.38);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt);font-family:var(--f);
+  padding-bottom:calc(var(--nav)+20px);min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+.hdr{padding:9px 13px;background:var(--card);border-bottom:1px solid var(--brd);
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:200;box-shadow:0 2px 8px var(--shd)}
+.hdr-l{display:flex;align-items:center;gap:8px}
+.logo{width:26px;height:26px;background:var(--acc);border-radius:6px;
+  display:flex;align-items:center;justify-content:center}
+.logo svg{width:14px;height:14px;fill:#fff}
+h1{font-size:.88rem;font-weight:800}
+h1 span{color:var(--mut);font-weight:400}
+.hdr-r{display:flex;align-items:center;gap:7px}
+.srv{padding:5px 7px;border-radius:var(--rs);border:1px solid var(--acc);
+  background:var(--bg);color:var(--txt);font-family:var(--f);
+  font-weight:700;font-size:.72rem;outline:none;-webkit-appearance:none}
+.hbtn{width:26px;height:26px;border-radius:50%;border:2px solid var(--acc);
+  background:transparent;color:var(--acc);font-weight:800;font-size:.8rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-family:var(--f);flex-shrink:0}
+.hbtn:hover{background:var(--acc);color:#fff}
+
+/* ── MODAL AYUDA ── */
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;
+  display:none;align-items:flex-start;justify-content:center;
+  padding:14px;overflow-y:auto}
+.ovl.open{display:flex}
+.ovl.open .mdl{margin-bottom:55px}
+.mdl{background:var(--card);border-radius:var(--r);max-width:510px;width:100%;
+  padding:22px 20px 24px;position:relative;margin:auto;
+  box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.mdl-foot{text-align:center;font-size:.65rem;color:var(--mut);padding:8px 0 2px;opacity:.7}
+.mdl-foot kbd{background:var(--deep);padding:2px 7px;border-radius:4px;
+  font-family:var(--m);font-size:.63rem;border:1px solid var(--brd)}
+.mdl-x{position:absolute;top:11px;right:11px;width:28px;height:28px;
+  border:none;background:var(--deep);border-radius:50%;cursor:pointer;
+  font-size:.95rem;color:var(--txt);display:flex;align-items:center;justify-content:center;
+  transition:background .15s}
+.mdl-x:hover{background:var(--brd)}
+.mdl h2{font-size:1rem;font-weight:800;margin-bottom:14px;color:var(--txt)}
+.hs h3{font-size:.76rem;font-weight:700;color:var(--acc);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:5px;margin-top:14px}
+.hs p,.hs li{font-size:.77rem;color:var(--mut);line-height:1.6}
+.hs ul{padding-left:16px;margin-top:4px}
+.fml{background:var(--bg);border-radius:6px;padding:7px 11px;
+  font-family:var(--m);font-size:.69rem;color:var(--txt);
+  margin-top:5px;border-left:3px solid var(--acc)}
+.hsep{height:1px;background:var(--brd);margin:14px 0}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1060px;margin:0 auto;padding:10px 10px calc(var(--nav)+120px)}
+.tab{display:none;animation:fu .18s ease}
+.tab.on{display:block;overflow:visible;margin-bottom:140px}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1}}
+
+.split{display:flex;gap:10px;align-items:flex-start}
+.pl{flex:0 0 215px;background:var(--card);padding:14px 12px;border-radius:var(--r);
+  border:1px solid var(--brd);box-shadow:0 4px 20px var(--shd);
+  position:sticky;top:58px;text-align:center;margin-top:15px}
+.pr{flex:1;min-width:0;background:var(--card);padding:14px 14px 24px;border-radius:var(--r);
+  border:1px solid var(--brd);box-shadow:0 4px 20px var(--shd);margin-top:10px}
+
+/* ── PANEL IZQ ── */
+.ib{width:84px;height:84px;border-radius:9px;background:var(--bg);
+  margin:0 auto 9px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--brd)}
+.ib img{width:68px;height:68px;object-fit:contain;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.13))}
+.iname{font-size:.81rem;font-weight:700;margin-bottom:2px}
+.iid{font-family:var(--m);font-size:.6rem;color:var(--acd);
+  background:var(--deep);padding:2px 6px;border-radius:4px;
+  display:inline-block;margin-bottom:9px;word-break:break-all}
+.sts{display:flex;flex-direction:column;gap:4px;text-align:left}
+.st{display:flex;justify-content:space-between;align-items:center;
+  font-size:.68rem;padding:4px 7px;background:var(--bg);
+  border-radius:5px;border:1px solid var(--brd)}
+.stl{color:var(--mut);font-weight:600}
+.stv{font-family:var(--m);font-weight:700;font-size:.69rem}
+.vp{color:var(--pro)}.vl{color:var(--los)}.vg{color:var(--gld)}.vb{color:var(--blu)}
+/* mat strips flipping */
+.mstrip{display:flex;align-items:center;gap:6px;padding:5px 7px;
+  background:var(--bg);border-radius:5px;border:1px solid var(--brd);margin-bottom:4px}
+.mstrip img{width:26px;height:26px;object-fit:contain;flex-shrink:0}
+.mn{font-size:.69rem;font-weight:700}
+.mq{font-size:.62rem;color:var(--mut);font-family:var(--m)}
+
+/* ── MÓDULO ── */
+.mtit{font-size:.94rem;font-weight:800;margin-bottom:2px}
+.msub{font-size:.67rem;color:var(--mut);font-family:var(--m);margin-bottom:12px}
+
+/* ── AUTO STRIP ── */
+.astrip{display:flex;align-items:center;justify-content:space-between;
+  background:var(--deep);border-radius:var(--rs);padding:7px 10px;
+  border:1px solid var(--brd);margin-bottom:10px;gap:6px;flex-wrap:wrap}
+.astrip span{font-size:.67rem;color:var(--mut);font-weight:600;flex:1;min-width:90px}
+.abtn{padding:5px 10px;background:var(--acc);color:#fff;border:none;
+  border-radius:20px;font-size:.66rem;font-weight:700;
+  cursor:pointer;font-family:var(--f);white-space:nowrap;flex-shrink:0;
+  transition:background .15s,opacity .15s}
+.abtn:hover{background:var(--acd)}
+.abtn:disabled{opacity:.55;cursor:not-allowed}
+
+/* ── FORMULARIO ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+  gap:8px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column}
+.fg label{font-size:.61rem;font-weight:700;margin-bottom:3px;
+  color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+#p1itemFilter{font-size:.72rem;padding:5px 7px;margin-bottom:2px;
+  border-radius:var(--rs);border:1px solid var(--brd);
+  background:var(--bg);color:var(--txt);font-family:var(--f);
+  outline:none;width:100%}
+#p1itemFilter:focus{border-color:var(--acc)}
+select,input[type=number],input[type=text]{
+  padding:8px 9px;border-radius:var(--rs);border:1px solid var(--brd);
+  background:var(--bg);color:var(--txt);font-family:var(--f);
+  font-size:.81rem;outline:none;width:100%;-webkit-appearance:none}
+select:focus,input:focus{border-color:var(--acc)}
+.sw{position:relative;grid-column:span 2;display:flex;align-items:center}
+.sw .si{width:14px;height:14px;fill:var(--mut);flex-shrink:0;margin-left:10px;pointer-events:none}
+.sw input{flex:1;padding-left:6px}
+
+/* ── AUTOCOMPLETE (FIX: usa data-attributes, SIN JSON.stringify en onclick) ── */
+.abox{position:absolute;top:calc(100% + 2px);left:0;right:0;
+  background:var(--card);border:1px solid var(--brd);border-radius:var(--rs);
+  max-height:210px;overflow-y:auto;z-index:400;
+  box-shadow:0 6px 20px var(--shd2);display:none}
+.abox.open{display:block}
+.arow{padding:7px 10px;cursor:pointer;font-size:.76rem;
+  border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;gap:7px}
+.arow:last-child{border-bottom:none}
+.arow:hover,.arow:active{background:var(--deep)}
+.arow img{width:24px;height:24px;object-fit:contain;flex-shrink:0;border-radius:3px}
+.arow-id{font-family:var(--m);font-size:.6rem;color:var(--mut)}
+
+/* ── TOGGLES ── */
+.tgg{display:flex;background:var(--bg);border-radius:var(--rs);
+  border:1px solid var(--brd);overflow:hidden}
+.tgb{flex:1;padding:7px 4px;border:none;background:transparent;cursor:pointer;
+  font-size:.69rem;font-weight:700;font-family:var(--f);color:var(--mut)}
+.tgb.on{background:var(--acc);color:#fff}
+
+/* ── BOTONES ── */
+.brow{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.btn{flex:1;min-width:100px;padding:10px 10px;background:var(--acc);color:#fff;
+  border:none;border-radius:var(--rs);font-size:.78rem;font-weight:700;
+  font-family:var(--f);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:5px}
+.btn:hover{background:var(--acd)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:13px;height:13px;fill:#fff}
+.btn.sec{background:var(--deep);color:var(--txt)}
+.btn.sec svg{fill:var(--txt)}
+.btn.sec:hover{background:var(--brd)}
+
+/* ── LOADING ── */
+.ldw{display:none;text-align:center;padding:24px 10px;color:var(--mut);
+  font-size:.82rem;font-family:var(--f);font-weight:700;
+  border-radius:var(--rs);background:var(--card);border:1px solid var(--brd);
+  margin-bottom:9px}
+.ld{display:flex;align-items:center;justify-content:center;gap:12px}
+.spin{width:22px;height:22px;border:3px solid var(--brd);border-top-color:var(--acc);
+  border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── ALERTAS ── */
+.al{padding:8px 10px;border-radius:var(--rs);font-size:.71rem;font-weight:600;
+  margin-bottom:9px;display:none;align-items:flex-start;gap:5px;line-height:1.5}
+.al.show{display:flex}
+.ag{background:var(--pb);color:var(--pro);border:1px solid #aad5c8}
+.aw{background:var(--gb);color:var(--gld);border:1px solid #fdd87a}
+.ab{background:var(--lb);color:var(--los);border:1px solid #f5b8b8}
+.ai{background:var(--bb);color:var(--blu);border:1px solid #90bef0}
+
+/* ── VEREDICTO ── */
+.verd{border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;
+  font-weight:800;font-size:.89rem;text-align:center;display:none}
+.verd.show{display:block}
+.v-win{background:var(--pb);color:var(--pro);border:2px solid var(--pro);
+  box-shadow:0 0 0 2px var(--bg),0 4px 14px rgba(30,110,62,.25)}
+.v-lose{background:var(--lb);color:var(--los);border:2px solid var(--los);
+  box-shadow:0 0 0 2px var(--bg),0 4px 14px rgba(166,32,32,.25)}
+.v-warn{background:var(--gb);color:var(--gld);border:2px solid var(--gld);
+  box-shadow:0 0 0 2px var(--bg),0 4px 14px rgba(200,150,42,.25)}
+
+/* ── TABLA ── */
+.tw{width:100%;overflow:auto;border-radius:var(--rs);border:1px solid var(--brd);
+  -webkit-overflow-scrolling:touch;padding-bottom:14px}
+.ftr{padding:10px 12px 20px;font-size:.68rem;color:var(--mut);border-radius:var(--rs);
+  background:var(--card);border:1px solid var(--brd);margin-top:10px;margin-bottom:10px}
+.ftr-i{display:flex;align-items:center;gap:6px}
+.ftr-i svg{width:14px;height:14px;fill:var(--mut);flex-shrink:0}
+.ftr-i span{line-height:1.4}
+table{width:100%;border-collapse:collapse;min-width:390px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--brd);font-size:.76rem}
+th{background:var(--bg);color:var(--mut);font-weight:700;
+  font-size:.62rem;text-transform:uppercase;letter-spacing:.4px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:color-mix(in srgb, var(--acc) 8%, transparent)}
+.ps{color:var(--los);font-weight:700;font-family:var(--m)}
+.pb2{color:var(--pro);font-weight:700;font-family:var(--m)}
+.pg{color:var(--gld);font-weight:700;font-family:var(--m)}
+.bdg{display:inline-flex;padding:2px 6px;border-radius:20px;font-size:.61rem;font-weight:700}
+.bfr{background:var(--pb);color:var(--pro)}
+.bol{background:var(--lb);color:var(--los)}
+.bst{background:var(--deep);color:var(--mut)}
+
+/* ── FILTROS ── */
+.fb{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;align-items:center}
+.fb label{font-size:.62rem;font-weight:700;color:var(--mut);text-transform:uppercase}
+.chip{padding:3px 9px;border-radius:20px;border:1px solid var(--brd);
+  background:var(--bg);font-size:.64rem;font-weight:700;cursor:pointer;color:var(--mut)}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+
+/* ── RESULT CARDS ── */
+.rcg{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+  gap:7px;margin-bottom:10px}
+.rc{background:var(--bg);border-radius:var(--rs);padding:9px;
+  border:1px solid var(--brd);text-align:center}
+.rcl{font-size:.6rem;font-weight:700;color:var(--mut);text-transform:uppercase;
+  letter-spacing:.4px;margin-bottom:4px}
+.rcv{font-size:1.08rem;font-weight:800;font-family:var(--m)}
+.rcs{font-size:.62rem;color:var(--mut);margin-top:2px}
+.rp{color:var(--pro)}.rl{color:var(--los)}.rg{color:var(--gld)}.rd{color:var(--txt)}
+
+/* ── DESGLOSE ── */
+.bp{border-radius:var(--rs);border:1.5px solid var(--brd);padding:11px;
+  margin-bottom:9px;background:var(--bg);overflow-x:auto}
+.bt{font-size:.63rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.4px;margin-bottom:8px;color:var(--mut)}
+.brow2{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px dashed var(--brd);font-size:.74rem}
+.brow2:last-child{border-bottom:none}
+.brl{color:var(--mut)}.brv{font-family:var(--m);font-weight:600}
+.sep{height:1px;background:var(--brd);margin:10px 0}
+.empty{text-align:center;padding:20px 10px;color:var(--mut);font-size:.74rem}
+.empty svg{width:34px;height:34px;fill:var(--brd);margin:0 auto 7px;display:block}
+
+/* ── SUGERENCIA FLIPPING ── */
+.fl-sug{display:none;background:var(--bb);color:var(--blu);border-radius:var(--rs);padding:7px 9px;margin-bottom:7px;font-size:.68rem;font-weight:600;text-align:center;border:1px solid #90bef0;line-height:1.4}
+
+/* ── CRAFTEO MATS ── */
+.ml{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+.mr{display:grid;grid-template-columns:1fr 98px 68px;gap:5px;align-items:center;
+  background:var(--bg);border-radius:var(--rs);padding:6px 9px;border:1px solid var(--brd)}
+.mrn{font-size:.74rem;font-weight:600}
+.mrq{font-family:var(--m);font-size:.65rem;color:var(--mut)}
+.mr input{text-align:right;font-family:var(--m)}
+.mrt{font-family:var(--m);font-weight:700;font-size:.73rem;text-align:right}
+
+/* ── FOCO ── */
+.frow{display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);border-radius:var(--rs);padding:8px 10px;
+  border:1px solid var(--brd);margin-bottom:9px}
+.flabel{font-size:.74rem;font-weight:700}
+.fhint{font-size:.63rem;color:var(--mut);margin-top:2px}
+.sw2{position:relative;display:inline-block;width:37px;height:20px;flex-shrink:0}
+.sw2 input{opacity:0;width:0;height:0}
+.sldr{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;
+  background:var(--deep);border-radius:20px;transition:.3s;border:1px solid var(--brd)}
+.sldr:before{position:absolute;content:'';height:14px;width:14px;left:2px;bottom:2px;
+  background:#fff;border-radius:50%;transition:.3s;
+  box-shadow:0 1px 3px rgba(0,0,0,.18)}
+input:checked+.sldr{background:var(--acc)}
+input:checked+.sldr:before{transform:translateX(17px)}
+
+/* ── NAV ── */
+.nav{position:fixed;bottom:0;left:0;width:100%;height:var(--nav);
+  background:var(--card);border-top:1px solid var(--brd);
+  display:flex;justify-content:space-around;align-items:stretch;
+  box-shadow:0 -3px 12px rgba(0,0,0,.07);z-index:1000}
+.ni{flex:1;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;color:var(--mut);font-size:.61rem;font-weight:700;
+  cursor:pointer;gap:2px;background:none;border:none;font-family:var(--f);
+  padding:0;border-top:2px solid transparent}
+.ni svg{width:18px;height:18px;fill:currentColor}
+.ni.on{color:var(--acd);border-top-color:var(--acc)}
+.ni span{margin-top:1px}
+
+/* ── HOME / LANDING PAGE ── */
+.hero{text-align:center;padding:28px 14px 22px;margin-bottom:10px}
+.hero h2{font-size:1.5rem;font-weight:800;color:var(--txt)}
+.hero h2 span{color:var(--acc)}
+.hero p{font-size:.76rem;color:var(--mut);margin:5px 0 16px;line-height:1.5}
+.hero-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 28px;
+  background:var(--acd);color:#fff;border:none;font-size:.92rem;
+  font-weight:700;font-family:var(--f);cursor:pointer;
+  transition:background .15s;border-radius:3px}
+.hero-btn:hover{background:var(--acc)}
+.hero-btn svg{width:16px;height:16px;fill:#fff}
+
+.h-feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px;margin:0 0 12px}
+.h-card{background:var(--bg);border:1px solid var(--brd);padding:14px 8px 10px;
+  text-align:center;cursor:pointer;transition:border-color .12s,background .12s;
+  border-top:2px solid var(--brd)}
+.h-card:hover{border-color:var(--acc);border-top-color:var(--acc);background:var(--card)}
+.h-card svg{width:28px;height:28px;fill:var(--acd);margin-bottom:5px}
+.h-card h3{font-size:.72rem;font-weight:700;margin-bottom:2px;color:var(--txt)}
+.h-card p{font-size:.6rem;color:var(--mut);line-height:1.4}
+
+.h-about{padding:16px 0 10px;border-top:1px solid var(--brd);margin-bottom:6px}
+.h-about h3{font-size:.8rem;font-weight:700;margin-bottom:5px;color:var(--acc)}
+.h-about p{font-size:.71rem;color:var(--mut);line-height:1.6;margin-bottom:6px}
+
+/* ── FOOTER SECTIONS ── */
+.h-foot{border-top:1px solid var(--brd);padding:10px 0 4px}
+.hf-item{margin-bottom:2px}
+.hf-hdr{cursor:pointer;font-size:.68rem;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.3px;user-select:none;padding:4px 0}
+.hf-body{display:none;padding:4px 10px 8px;font-size:.65rem;color:var(--mut);line-height:1.5}
+.hf-item.open .hf-body{display:block}
+.hf-body a{color:var(--acc);text-decoration:none;font-weight:600}
+.hf-body a:hover{text-decoration:underline}
+.hf-legal{text-align:center;font-size:.6rem;color:var(--mut);padding:8px 0 2px;opacity:.7}
+
+/* ── RESPONSIVE MÓVIL ── */
+@media(max-width:660px){
+  .hero{padding:22px 10px 18px}
+  .hero h2{font-size:1.2rem}
+  .hero-btn{font-size:.9rem;padding:10px 24px}
+  .h-feat{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+  .h-card{padding:12px 8px}
+  .h-card svg{width:26px;height:26px}
+  .h-card h3{font-size:.68rem}
+  .split{flex-direction:column}
+  .pl{flex:none;width:100%;position:static;
+    display:flex;align-items:center;text-align:left;
+    padding:9px 10px;gap:9px;border-radius:var(--r);margin-top:0}
+  .ib{width:50px;height:50px;flex-shrink:0;margin:0}
+  .ib img{width:40px;height:40px}
+  #T1 .sts{display:none}
+  #T2 .sts, #T3 .sts, #T4 .sts{display:flex;flex-direction:column;gap:4px}
+  .pr{width:100%;padding:11px}
+  .grid{grid-template-columns:1fr 1fr}
+  .sw{grid-column:span 2}
+  .mr{grid-template-columns:1fr 80px}
+  .mrt{display:none}
+  .ftr-i{flex-wrap:wrap}
+  .verd{font-size:.82rem;padding:8px 10px}
+  .spin{width:16px;height:16px}
+  .ldw{padding:14px 8px;font-size:.72rem}
+  .pl .sts{display:none}
+  body{padding-bottom:calc(var(--nav)+30px)}
+  .wrap{padding:6px 6px calc(var(--nav)+80px)}
+  .rcg{grid-template-columns:1fr 1fr}
+  select,input[type=number],input[type=text]{font-size:.78rem;padding:7px 7px}
+  .btn{padding:9px 8px;font-size:.72rem}
+  .tw{overflow-x:auto}
+  .tab.on{margin-bottom:30px}
+  .mtit{font-size:.84rem}
+  .msub{font-size:.62rem}
+  .iname{font-size:.74rem}
+  .iid{font-size:.55rem}
+  #p1item[multiple]{height:100px}
+  #p1itemFilter{font-size:.68rem;padding:4px 5px}
+  .al{padding:6px 8px;font-size:.68rem}
+}
+@media(max-width:360px){
+  .grid{grid-template-columns:1fr}
+  .sw{grid-column:span 1}
+  .btn{font-size:.68rem;padding:8px 6px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-l">
+    <div class="logo h-home" style="cursor:pointer"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+    <h1 class="h-home" style="cursor:pointer">Albion <span>Terminal</span></h1>
+  </div>
+  <div class="hdr-r">
+    <select id="SRV" class="srv">
+      <option value="west">&#127758; Americas</option>
+      <option value="europe">&#127757; Europa</option>
+      <option value="east">&#127759; Asia</option>
+    </select>
+    <button class="hbtn" id="helpBtn">?</button>
+    <button class="hbtn" id="dmBtn" title="Modo oscuro">🌙</button>
+  </div>
+</header>
+
+<!-- MODAL AYUDA -->
+<div class="ovl" id="OVL">
+  <div class="mdl">
+    <button class="mdl-x" id="mdlX">&#10005;</button>
+    <h2>Albion Market Terminal</h2>
+    <div class="hs">
+      <p style="margin-bottom:6px">Busca cualquier &#237;tem, consulta precios en vivo, calcula flips, rutas y costos de crafteo. Datos de <strong>Albion Data Project</strong>.</p>
+    </div>
+    <div class="hsep"></div>
+    <div class="hs">
+      <h3>Precios Hoy</h3>
+      <p>Busca un &#237;tem y consulta su precio de venta m&#237;nimo y compra m&#225;ximo en todas las ciudades.</p>
+      <div class="fml">Arbitraje = Comprar barato (Ciudad A) &#8594; Vender caro (Ciudad B)</div>
+      <ul>
+        <li>Selecciona categor&#237;a &#8594; &#237;tem &#8594; tier &#8594; encantamiento</li>
+        <li>Usa el buscador para encontrar r&#225;pido por nombre</li>
+        <li>Filtros: Todos / Con liquidez / Recientes / Mayor spread</li>
+        <li>Las alertas verdes indican arbitraje disponible</li>
+      </ul>
+    </div>
+    <div class="hsep"></div>
+    <div class="hs">
+      <h3>Flipping</h3>
+      <p>Compra un &#237;tem <strong>plano (.0)</strong> al m&#237;nimo precio de venta, lo enchantas, y vendes el resultado colocando una OC en el <strong>Mercado Negro</strong>.</p>
+      <div class="fml">Profit = OC BM &#215; (1 - 2.5%) - precio .0 - materiales</div>
+      <ul>
+        <li>Selecciona &#237;tem, tier y encantamiento objetivo (.1 a .4)</li>
+        <li>El Mercado Negro cobra 2.5% (NO tiene impuesto de venta adicional)</li>
+        <li>ROI &gt;15% se marca como rentable</li>
+        <li>Bot&#243;n "Cargar precios en vivo" obtiene precio .0 y OC BM</li>
+      </ul>
+    </div>
+    <div class="hsep"></div>
+    <div class="hs">
+      <h3>Rutas</h3>
+      <p>Compra en una ciudad y vende en otra aprovechando diferencias de precio. El sistema calcula impuesto, peso, y recomienda la montura &#243;ptima.</p>
+      <div class="fml">Profit = Venta x qty x (1-impuesto) - Compra x qty - Costo viaje</div>
+      <ul>
+        <li>Premium = 4% impuesto | Normal = 8%</li>
+        <li>Ingresa el peso por unidad para recomendaci&#243;n de montura</li>
+        <li>Monturas: Caballo T3 (862kg) a Grizzly T8 (5,937kg)</li>
+        <li>ROI &gt;15% = ruta rentable | Bot&#243;n "Precios en vivo" para carga autom&#225;tica</li>
+      </ul>
+    </div>
+    <div class="hsep"></div>
+    <div class="hs">
+      <h3>Crafteo</h3>
+      <p>Compra materiales refinados, cr&#225;ftealos en una ciudad con bono de material, y vende el &#237;tem producido. La <strong>RRA</strong> (Return Rate Address) te devuelve un % de materiales, reduciendo tu costo real.</p>
+      <div class="fml">Costo real = Materiales x (1 - RRA) + Nutrici&#243;n</div>
+      <div class="fml">Profit = Venta x (1-impuesto) - Costo real</div>
+      <ul>
+        <li><strong>15.2% RRA</strong> = ciudad sin bono (Caerleon)</li>
+        <li><strong>37.5% RRA</strong> = ciudad bonificada</li>
+        <li><strong>47.9% RRA</strong> = bonificada + Foco activo</li>
+        <li>Break-even = precio m&#237;nimo al que no pierdes plata</li>
+        <li>Ciudades: Lymhurst(cuero) Martlock(madera) FS(tela) BW(piedra) Thetford(metal)</li>
+      </ul>
+    </div>
+    <div class="hsep"></div>
+    <div class="hs">
+      <h3>Atajos y tips</h3>
+      <ul>
+        <li><strong>Servidores:</strong> cambia entre Americas/Europa/Asia seg&#250;n tu regi&#243;n</li>
+        <li><strong>Encantamiento:</strong> cantidades fijas por categor&#237;a: 2H=384, 1H=288, Armor=192, Head/Shoes/Off/Cape=96</li>
+        <li><strong>Crafteo:</strong> usa "Cargar precios en vivo" para obtener precios de refinados desde la API</li>
+      </ul>
+    </div>
+    <div class="hsep"></div>
+    <div class="mdl-foot">Presiona <kbd>Esc</kbd> o haz clic fuera para cerrar</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════════ TAB 0: INICIO ══════════════ -->
+<div id="T0" class="tab on">
+  <div class="hero">
+    <h2><span>Market</span> Terminal</h2>
+    <p>Precios en vivo &middot; Flipping &middot; Rutas &middot; Crafteo<br>Datos de <strong>Albion Data Project</strong></p>
+    <button class="hero-btn" id="heroGo">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+      &iexcl;Vamos!
+    </button>
+  </div>
+
+  <div class="h-feat">
+    <div class="h-card" data-tab="T1">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18v-2H5V3H3zm14 12.59L13.5 12 10 15.5 5 10.5V13H3V7h6v2H6.41l3.59 3.59L13.5 9 19 14.5V12h2v5.5h-4z"/></svg>
+      <h3>Precios Hoy</h3>
+      <p>Consulta el precio de compra y venta de cualquier &iacute;tem en todas las ciudades.</p>
+    </div>
+    <div class="h-card" data-tab="T2">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+      <h3>Flipping</h3>
+      <p>Compra .0 plano, enchantalo y vende al Mercado Negro. Profit con 2.5% de setup fee.</p>
+    </div>
+    <div class="h-card" data-tab="T3">
+      <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+      <h3>Rutas</h3>
+      <p>Compra barato en una ciudad y vende caro en otra. Calcula impuesto, peso y montura.</p>
+    </div>
+    <div class="h-card" data-tab="T4">
+      <svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.1L9.4 6.6 7 9.1 2.3 4.3C1.1 6.7 1.5 9.7 3.5 11.7c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l1.8-1.8c.4-.4.4-1 0-1.5z"/></svg>
+      <h3>Crafteo</h3>
+      <p>Calcula costos reales con RRA, foco, bonos de ciudad y encuentra productos rentables.</p>
+    </div>
+  </div>
+
+  <div class="h-about">
+    <h3>Sobre el proyecto</h3>
+    <p><strong>Albion Market Terminal</strong> es una herramienta gratuita para jugadores de Albion Online que consolida datos del <strong>Albion Data Project</strong> en una interfaz limpia y r&aacute;pida. Pesquisa precios en vivo, detecta oportunidades de arbitraje, calcula flips de encantamiento, optimiza rutas comerciales y analiza costos de crafteo con RRA.</p>
+    <p>No requiere instalaci&oacute;n &mdash; funciona en cualquier navegador, desktop o m&oacute;vil. Todos los c&aacute;lculos se hacen localmente en tu dispositivo, tus datos nunca salen de tu m&aacute;quina.</p>
+  </div>
+
+  <div class="h-foot">
+    <div class="hf-item open">
+      <div class="hf-hdr">Creadores</div>
+      <div class="hf-body">Desarrollado por <strong>Th3go</strong> &mdash; <a href="https://github.com/anomalyco/opencode" target="_blank" rel="noopener">c&oacute;digo abierto en GitHub</a>.</div>
+    </div>
+    <div class="hf-item open">
+      <div class="hf-hdr">Reglas</div>
+      <div class="hf-body">Precios del <a href="https://www.albion-online-data.com/" target="_blank" rel="noopener">Albion Data Project</a>. No afiliado con Sandbox Interactive GmbH. Uso educativo y personal.</div>
+    </div>
+    <div class="hf-item open">
+      <div class="hf-hdr">Pol&iacute;ticas de uso</div>
+      <div class="hf-body">No almacenamos datos personales. Todo se procesa localmente. Precios referenciales &mdash; &uacute;sala bajo tu responsabilidad.</div>
+    </div>
+    <div class="hf-item open">
+      <div class="hf-hdr">Donaciones</div>
+      <div class="hf-body">Apoya en <a href="https://ko-fi.com/anomalyco" target="_blank" rel="noopener">Ko-fi</a> o contribuye en <a href="https://github.com/anomalyco/opencode" target="_blank" rel="noopener">GitHub</a>.</div>
+    </div>
+    <div class="hf-legal">Albion Market Terminal &mdash; 2025 &mdash; Th3go</div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 1: PRECIOS ══════════════ -->
+<div id="T1" class="tab">
+  <div class="split">
+    <div class="pl">
+      <div class="ib"><img id="p1img" src="" alt="" onerror="imgErr(this)"></div>
+      <div class="iname" id="p1name">&#8212;</div>
+      <div class="iid" id="p1id">Selecciona un &#237;tem</div>
+      <div class="sts">
+        <div class="st"><span class="stl">Venta m&#237;n</span><span class="stv vg" id="p1sv">&#8212;</span></div>
+        <div class="st"><span class="stl">Compra m&#225;x</span><span class="stv vp" id="p1bv">&#8212;</span></div>
+        <div class="st"><span class="stl">Spread</span><span class="stv vg" id="p1sp">&#8212;</span></div>
+        <div class="st"><span class="stl">Mejor ciudad</span><span class="stv vb" id="p1bc" style="font-size:.59rem">&#8212;</span></div>
+        <div class="st"><span class="stl">Liquidez</span><span class="stv" id="p1lq">&#8212;</span></div>
+      </div>
+    </div>
+    <div class="pr">
+      <div class="mtit">Precios Hoy</div>
+      <div class="msub">// Liquidez en tiempo real · Albion Data Project · detecta arbitraje automáticamente</div>
+      <div class="grid">
+        <div class="sw">
+          <svg class="si" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="p1q" placeholder="Patas de Oso, Bastón Ígneo, Espada, Hacha..." autocomplete="off">
+          <div class="abox" id="p1box"></div>
+        </div>
+        <div class="fg"><label>Categor&#237;a</label><select id="p1cat"></select></div>
+        <div class="fg"><label>&#205;tem</label>
+          <input type="text" id="p1itemFilter" placeholder="Filtrar items..." autocomplete="off">
+          <select id="p1item"></select>
+        </div>
+        <div class="fg"><label>Tier</label>
+          <select id="p1tier">
+            <option>T1</option><option>T2</option><option>T3</option>
+            <option selected>T4</option><option>T5</option><option>T6</option><option>T7</option><option>T8</option>
+          </select>
+        </div>
+        <div class="fg"><label>Encantamiento</label>
+          <select id="p1ench">
+            <option value="">.0 Plano</option><option value="@1">.1 Verde</option>
+            <option value="@2">.2 Azul</option><option value="@3">.3 Morado</option><option value="@4">.4 Dorado</option>
+          </select>
+        </div>
+      </div>
+      <div class="brow">
+        <button class="btn" id="p1fetch">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          Consultar precios
+        </button>
+      </div>
+      <div class="ldw" id="p1load"><div class="ld"><div class="spin"></div><span>Consultando mercado</span></div></div>
+      <div class="al" id="p1scan"></div>
+      <div class="al" id="p1arb"></div>
+      <div class="fb">
+        <label>Filtro tabla:</label>
+        <button class="chip on" data-f="all">Todas</button>
+        <button class="chip" data-f="liq">Con liquidez</button>
+        <button class="chip" data-f="fresh">Recientes &lt;1h</button>
+        <button class="chip" data-f="spr">Mayor spread</button>
+      </div>
+      <div class="tw" id="p1tw" style="display:none">
+        <table>
+          <thead>
+            <tr>
+              <th>Ciudad</th><th>Venta m&#237;n</th><th>Compra m&#225;x</th>
+              <th>Spread</th><th>ROI arb.</th><th>Actualizaci&#243;n</th>
+            </tr>
+          </thead>
+          <tbody id="p1tb"></tbody>
+        </table>
+      </div>
+      <div class="ftr" id="p1ftr" style="display:none">
+        <div class="ftr-i">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          <span>Los precios se actualizan cada vez que un jugador carga datos. <strong>Verde</strong> = reciente (&lt;1h), <strong>Gris</strong> = medio (&lt;12h), <strong>Rojo</strong> = desactualizado. <span id="p1ts" style="opacity:.6"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 2: FLIPPING ══════════════ -->
+<div id="T2" class="tab">
+  <div class="split">
+    <div class="pl">
+      <div class="ib"><img id="flimg" src="" alt="" onerror="imgErr(this)"></div>
+      <div class="iname" id="flname">Selecciona &#237;tem</div>
+      <div class="iid" id="flid">&#8212;</div>
+      <div class="sts" style="margin-top:8px">
+        <div class="st"><span class="stl">Precio .0</span><span class="stv vl" id="fls0">&#8212;</span></div>
+        <div class="st"><span class="stl">OC destino</span><span class="stv vp" id="flsbm">&#8212;</span></div>
+        <div class="st"><span class="stl">Profit/u</span><span class="stv" id="flspp">&#8212;</span></div>
+      </div>
+    </div>
+    <div class="pr">
+      <div class="mtit">Flipping por Encantamiento</div>
+      <div class="msub">// Compra &#237;tem .0 barato &rarr; Enchantas + Runas/Almas &rarr; OC en Mercado Negro</div>
+      <!-- Flujo del flip en 3 pasos -->
+      <div style="display:flex;gap:4px;margin-bottom:9px;flex-wrap:wrap">
+        <div style="flex:1;min-width:80px;background:var(--pb);border:1px solid #aad5c8;border-radius:var(--rs);padding:6px 8px;font-size:.63rem;color:var(--pro)">
+          <div style="font-weight:800;margin-bottom:2px">① Compra .0</div>
+          <div style="font-weight:600">Caerleon / ciudad más barata al precio mínimo de venta</div>
+        </div>
+        <div style="flex:1;min-width:80px;background:var(--gb);border:1px solid #fdd87a;border-radius:var(--rs);padding:6px 8px;font-size:.63rem;color:var(--gld)">
+          <div style="font-weight:800;margin-bottom:2px">② Enchantas</div>
+          <div style="font-weight:600">Runas / Almas / Reliquias según categoría y tier</div>
+        </div>
+        <div style="flex:1;min-width:80px;background:var(--bb);border:1px solid #90bef0;border-radius:var(--rs);padding:6px 8px;font-size:.63rem;color:var(--blu)">
+          <div style="font-weight:800;margin-bottom:2px">③ OC Mercado Negro</div>
+          <div style="font-weight:600">Pones orden de compra — el BM paga más que el mercado normal</div>
+        </div>
+      </div>
+      <div class="astrip">
+        <span>⚡ Carga precios en vivo: ítem base + materiales + OC Mercado Negro simultáneamente</span>
+        <button class="abtn" id="flLive">Cargar precios en vivo</button>
+      </div>
+      <div class="grid">
+        <div class="sw">
+          <svg class="si" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="flq" placeholder="Buscar &#237;tem enchantable: Espada, Bast&#243;n, Garras..." autocomplete="off">
+          <div class="abox" id="flbox"></div>
+        </div>
+        <div class="fg"><label>Tier</label>
+          <select id="fltier"><option>T4</option><option>T5</option><option>T6</option><option>T7</option><option>T8</option></select>
+        </div>
+        <div class="fg"><label>Encantamiento objetivo</label>
+          <select id="fletgt">
+            <option value="1">.0 &rarr; .1 (Runas)</option>
+            <option value="2">.0 &rarr; .2 (Almas)</option>
+            <option value="3">.0 &rarr; .3 (Reliquias)</option>
+            <option value="4">.0 &rarr; .4 (Fragmentos Avalonianos)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Venta (OC) en</label>
+          <select id="flmkt" disabled style="opacity:.7">
+            <option value="Black Market">Mercado Negro ⭐ (&#250;nica opci&#243;n)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Cantidad</label>
+          <input type="number" id="flqty" value="1" min="1">
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div style="font-size:.67rem;font-weight:700;color:var(--mut);text-transform:uppercase;margin-bottom:7px">Precios de mercado (editables)</div>
+      <div class="grid">
+        <div class="fg"><label>Precio &#237;tem .0</label>
+          <input type="number" id="flp0" placeholder="Ej: 150000">
+        </div>
+        <div class="fg"><label>OC Mercado Negro / destino</label>
+          <input type="number" id="flpbm" placeholder="Ej: 280000">
+        </div>
+      </div>
+      <div style="font-size:.67rem;font-weight:700;color:var(--mut);text-transform:uppercase;margin-bottom:7px">Materiales de encantamiento (todos los niveles previos)</div>
+      <div class="ml" id="flMatContainer"></div>
+      <div class="fl-sug" id="flSug"></div>
+      <div class="astrip" style="margin-bottom:9px">
+        <span>📌 El Mercado Negro solo cobra 2.5% de setup fee (sin impuesto de venta)</span>
+        <span style="font-family:var(--m);font-size:.68rem;font-weight:700">Fee: 2.5%</span>
+      </div>
+      <div class="brow">
+        <button class="btn" id="flCalcBtn">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          Calcular Profit
+        </button>
+      </div>
+      <div class="ldw" id="flload"><div class="ld"><div class="spin"></div><span>Consultando precios</span></div></div>
+      <div class="al" id="flal"></div>
+      <div id="flres" style="display:none">
+        <div class="verd" id="flverd"></div>
+        <div class="bp">
+          <div class="bt">Desglose del Flip</div>
+          <div class="brow2"><span class="brl">&#205;tem .0 &#215; cantidad</span><span class="brv ps" id="fb0">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Total materiales encant.</span><span class="brv ps" id="fbmat">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Inversi&#243;n total</span><span class="brv ps" id="fbtc">&#8212;</span></div>
+          <div class="brow2"><span class="brl">OC destino (ingreso bruto)</span><span class="brv pb2" id="fbbm">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Setup Fee Mercado Negro 2.5%</span><span class="brv ps" id="fbsetup">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Ingreso neto</span><span class="brv" id="fbnet">&#8212;</span></div>
+        </div>
+        <div class="rcg">
+          <div class="rc"><div class="rcl">Inversi&#243;n</div><div class="rcv rd" id="fri">&#8212;</div><div class="rcs">plata</div></div>
+          <div class="rc"><div class="rcl">Profit Neto</div><div class="rcv" id="frp">&#8212;</div><div class="rcs">tras fee 2.5%</div></div>
+          <div class="rc"><div class="rcl">ROI</div><div class="rcv" id="frr">&#8212;</div><div class="rcs">retorno</div></div>
+          <div class="rc"><div class="rcl">Profit / u</div><div class="rcv" id="frpu">&#8212;</div><div class="rcs">por &#237;tem</div></div>
+        </div>
+      </div>
+      <div class="empty" id="flempty">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <p>Selecciona un &#237;tem y carga precios<br>para calcular el profit del flip.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 3: RUTAS ══════════════ -->
+<div id="T3" class="tab">
+  <div class="split">
+    <div class="pl">
+      <div class="ib"><img id="rtimg" src="" alt="" onerror="imgErr(this)"></div>
+      <div class="iname" id="rtname">&#8212;</div>
+      <div class="iid" id="rtid">Selecciona un &#237;tem</div>
+      <div class="sts">
+        <div class="st"><span class="stl">Ruta</span><span class="stv vb" id="rtruta" style="font-size:.58rem">&#8212;</span></div>
+        <div class="st"><span class="stl">Profit/u</span><span class="stv" id="rtppu">&#8212;</span></div>
+        <div class="st"><span class="stl">ROI</span><span class="stv" id="rtroi">&#8212;</span></div>
+        <div class="st"><span class="stl">Peso total</span><span class="stv" id="rtwt">&#8212;</span></div>
+        <div class="st"><span class="stl">Montura</span><span class="stv vg" id="rtmnt" style="font-size:.58rem">&#8212;</span></div>
+      </div>
+    </div>
+    <div class="pr">
+      <div class="mtit">Rutas de Transporte</div>
+      <div class="msub">// Arbitraje interurbano &middot; Impuesto &middot; Peso &middot; Montura &#243;ptima</div>
+      <div class="astrip">
+        <span>&#127981; Consulta precios en origen y destino simult&#225;neamente</span>
+        <button class="abtn" id="rtLive">Precios en vivo</button>
+      </div>
+      <div class="grid">
+        <div class="sw">
+          <svg class="si" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="rtq" placeholder="Buscar &#237;tem a transportar..." autocomplete="off">
+          <div class="abox" id="rtbox"></div>
+        </div>
+        <div class="fg"><label>Tier</label>
+          <select id="rttier"><option>T4</option><option>T5</option><option>T6</option><option>T7</option><option>T8</option></select>
+        </div>
+        <div class="fg"><label>Encantamiento</label>
+          <select id="rtench">
+            <option value="">.0</option><option value="@1">.1</option>
+            <option value="@2">.2</option><option value="@3">.3</option><option value="@4">.4</option>
+          </select>
+        </div>
+        <div class="fg"><label>Ciudad Origen (Compra)</label>
+          <select id="rtorig">
+            <option>Martlock</option><option>Lymhurst</option><option>Bridgewatch</option>
+            <option>Fort Sterling</option><option>Thetford</option><option>Caerleon</option><option>Brecilien</option>
+          </select>
+        </div>
+        <div class="fg"><label>Ciudad Destino (Venta)</label>
+          <select id="rtdest">
+            <option>Black Market</option><option>Caerleon</option><option>Brecilien</option>
+            <option>Martlock</option><option>Lymhurst</option><option>Bridgewatch</option>
+            <option>Fort Sterling</option><option>Thetford</option>
+          </select>
+        </div>
+        <div class="fg"><label>Precio compra (por u.)</label>
+          <input type="number" id="rtbuy" placeholder="Ej: 120000">
+        </div>
+        <div class="fg"><label>Precio venta (por u.)</label>
+          <input type="number" id="rtsell" placeholder="Ej: 180000">
+        </div>
+        <div class="fg"><label>Cantidad</label>
+          <input type="number" id="rtqty" value="100" min="1">
+        </div>
+        <div class="fg"><label>Impuesto</label>
+          <div class="tgg" id="rtprem">
+            <button class="tgb on">Premium 4%</button>
+            <button class="tgb">Normal 8%</button>
+          </div>
+        </div>
+        <div class="fg"><label>Costo viaje (plata)</label>
+          <input type="number" id="rttrv" value="0">
+        </div>
+        <div class="fg"><label>Peso por unidad (kg)</label>
+          <input type="number" id="rtwpu" value="0" step="0.1">
+        </div>
+      </div>
+      <div class="brow">
+        <button class="btn sec" id="rtCalcBtn">
+          <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/></svg>
+          Calcular ruta
+        </button>
+      </div>
+      <div class="ldw" id="rtload"><div class="ld"><div class="spin"></div><span>Consultando ciudades</span></div></div>
+      <div class="al" id="rtal"></div>
+      <div id="rtres" style="display:none">
+        <div class="verd" id="rtverd"></div>
+        <div class="bp">
+          <div class="bt">Desglose de la operaci&#243;n</div>
+          <div class="brow2"><span class="brl">Compra &#215; cantidad</span><span class="brv ps" id="rbuy">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Venta &#215; cantidad</span><span class="brv pb2" id="rsell">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Impuesto mercado destino</span><span class="brv ps" id="rtax">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Costo de viaje</span><span class="brv ps" id="rtrv2">&#8212;</span></div>
+        </div>
+        <div class="rcg">
+          <div class="rc"><div class="rcl">Inversi&#243;n</div><div class="rcv rd" id="rri">&#8212;</div><div class="rcs">plata</div></div>
+          <div class="rc"><div class="rcl">Profit Neto</div><div class="rcv" id="rrp">&#8212;</div><div class="rcs">tras impuesto</div></div>
+          <div class="rc"><div class="rcl">ROI</div><div class="rcv" id="rrr">&#8212;</div><div class="rcs">retorno</div></div>
+          <div class="rc"><div class="rcl">Profit / u</div><div class="rcv" id="rrpu">&#8212;</div><div class="rcs">por &#237;tem</div></div>
+        </div>
+        <div class="al show" id="rtwtal"></div>
+      </div>
+      <div class="empty" id="rtempty">
+        <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/></svg>
+        <p>Usa "Precios en vivo" o ingresa precios<br>para calcular la ruta.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 4: CRAFTEO ══════════════ -->
+<div id="T4" class="tab">
+  <div class="split">
+    <div class="pl">
+      <div class="ib"><img id="crimg" src="" alt="" onerror="imgErr(this)"></div>
+      <div class="iname" id="crname">Selecciona &#237;tem</div>
+      <div class="iid" id="crid">&#8212;</div>
+      <div class="sts">
+        <div class="st"><span class="stl">Costo mats</span><span class="stv vl" id="crsm">&#8212;</span></div>
+        <div class="st"><span class="stl">RRA activa</span><span class="stv vg" id="crsrra">&#8212;</span></div>
+        <div class="st"><span class="stl">Ahorro RRA</span><span class="stv vp" id="crssave">&#8212;</span></div>
+        <div class="st"><span class="stl">Profit</span><span class="stv" id="crsp">&#8212;</span></div>
+        <div class="st"><span class="stl">Break-even</span><span class="stv vg" id="crsbe">&#8212;</span></div>
+      </div>
+    </div>
+    <div class="pr">
+      <div class="mtit">Terminal de Producci&#243;n</div>
+      <div class="msub">// Costo real con RRA, foco, impuesto y bonos de ciudad</div>
+      <div class="grid">
+        <div class="sw">
+          <svg class="si" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="crq" placeholder="Buscar &#237;tem a craftear..." autocomplete="off">
+          <div class="abox" id="crbox"></div>
+        </div>
+        <div class="fg"><label>Tier</label>
+          <select id="crtier"><option>T4</option><option>T5</option><option>T6</option><option>T7</option><option>T8</option></select>
+        </div>
+        <div class="fg"><label>Encantamiento output</label>
+          <select id="crench">
+            <option value="">.0</option><option value="@1">.1</option>
+            <option value="@2">.2</option><option value="@3">.3</option>
+            <option value="@4">.4</option>
+          </select>
+        </div>
+        <div class="fg"><label>Ciudad de crafteo</label>
+          <select id="crcity">
+            <option>Lymhurst</option><option>Martlock</option><option>Bridgewatch</option>
+            <option>Fort Sterling</option><option>Thetford</option><option>Caerleon</option><option>Brecilien</option>
+          </select>
+        </div>
+        <div class="fg"><label>N&#250;mero de crafteos</label>
+          <input type="number" id="crqty" value="1" min="1">
+        </div>
+        <div class="fg"><label>Nutrici&#243;n estaci&#243;n (plata/run)</label>
+          <input type="number" id="crnutr" value="350" min="0">
+        </div>
+        <div class="fg"><label>Precio de venta estimado</label>
+          <input type="number" id="crprice" value="0" placeholder="Precio en mercado">
+        </div>
+        <div class="fg"><label>Impuesto de venta</label>
+          <div class="tgg" id="crtax">
+            <button class="tgb on">Premium 4%</button>
+            <button class="tgb">Normal 8%</button>
+          </div>
+        </div>
+      </div>
+      <div class="frow">
+        <div>
+          <div class="flabel">Usar Foco en Crafteo</div>
+          <div class="fhint" id="crrhint">RRA: 15.2% &#8212; sin bono de ciudad</div>
+        </div>
+        <label class="sw2">
+          <input type="checkbox" id="crfocus">
+          <span class="sldr"></span>
+        </label>
+      </div>
+      <div class="sep"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+        <div style="font-size:.66rem;font-weight:700;color:var(--mut);text-transform:uppercase">Materiales base</div>
+        <div style="font-size:.63rem;color:var(--mut)">Precio de mercado por unidad</div>
+      </div>
+      <div class="ml" id="crml"></div>
+      <div class="fl-sug" id="crSug"></div>
+      <div class="astrip">
+        <span>&#128200; Consulta precios de materiales en todas las ciudades autom&#225;ticamente</span>
+        <button class="abtn" id="crLive">Cargar precios en vivo</button>
+      </div>
+      <div class="brow">
+        <button class="btn" id="crCalcBtn">
+          <svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.1L9.4 6.6 7 9.1 2.3 4.3C1.1 6.7 1.5 9.7 3.5 11.7c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l1.8-1.8c.4-.4.4-1 0-1.5z"/></svg>
+          Calcular producci&#243;n
+        </button>
+      </div>
+      <div class="ldw" id="crload"><div class="ld"><div class="spin"></div><span>Calculando</span></div></div>
+      <div class="al" id="cral"></div>
+      <div id="crres" style="display:none">
+        <div class="verd" id="crverd"></div>
+        <div class="bp">
+          <div class="bt">Desglose de producci&#243;n</div>
+          <div class="brow2"><span class="brl">Costo bruto materiales</span><span class="brv ps" id="cbgross">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Ahorro RRA (<span id="cbrra">&#8212;</span>)</span><span class="brv pb2" id="cbsave">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Costo neto materiales</span><span class="brv" id="cbnmat">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Nutrici&#243;n &#215; corridas</span><span class="brv ps" id="cbnutr">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Impuesto de venta</span><span class="brv ps" id="cbtax">&#8212;</span></div>
+          <div class="brow2"><span class="brl">Ingreso neto</span><span class="brv" id="cbnet">&#8212;</span></div>
+        </div>
+        <div class="rcg">
+          <div class="rc"><div class="rcl">Costo Total</div><div class="rcv rd" id="crrc">&#8212;</div><div class="rcs">por run(s)</div></div>
+          <div class="rc"><div class="rcl">Profit Neto</div><div class="rcv" id="crrp">&#8212;</div><div class="rcs">tras todo</div></div>
+          <div class="rc"><div class="rcl">Margen</div><div class="rcv" id="crrm">&#8212;</div><div class="rcs">% inversi&#243;n</div></div>
+          <div class="rc"><div class="rcl">Break-Even</div><div class="rcv rg" id="crrb">&#8212;</div><div class="rcs">precio m&#237;nimo</div></div>
+        </div>
+      </div>
+      <div class="empty" id="crempty">
+        <svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.1L9.4 6.6 7 9.1 2.3 4.3C1.1 6.7 1.5 9.7 3.5 11.7c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l1.8-1.8c.4-.4.4-1 0-1.5z"/></svg>
+        <p>Selecciona un &#237;tem e ingresa precios<br>de materiales para calcular la producci&#243;n.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- BARRA NAV -->
+<nav class="nav">
+  <button class="ni" data-tab="T1">
+    <svg viewBox="0 0 24 24"><path d="M3 3v18h18v-2H5V3H3zm14 12.59L13.5 12 10 15.5 5 10.5V13H3V7h6v2H6.41l3.59 3.59L13.5 9 19 14.5V12h2v5.5h-4z"/></svg>
+    <span>Precios</span>
+  </button>
+  <button class="ni" data-tab="T2">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+    <span>Flipping</span>
+  </button>
+  <button class="ni" data-tab="T3">
+    <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+    <span>Rutas</span>
+  </button>
+  <button class="ni" data-tab="T4">
+    <svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.1L9.4 6.6 7 9.1 2.3 4.3C1.1 6.7 1.5 9.7 3.5 11.7c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l1.8-1.8c.4-.4.4-1 0-1.5z"/></svg>
+    <span>Crafteo</span>
+  </button>
+</nav>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   BASE DE DATOS DE ÍTEMS — IDs exactos API Albion Online
+   Estructura: { "Categoria": { "Nombre": { id, weight, mat } } }
+   ID final = Tier + id + Encantamiento
+   Ej: T5_2H_FIRESTAFF@2
+════════════════════════════════════════════════════════ */
+const DB = {
+  /* ── ARMAS CUERPO A CUERPO ──────────────────────────────── */
+  "Armas CàC": {
+    "Espada":              { id:"_MAIN_SWORD",         weight:5,  mat:"metal" },
+    "Espada de Guerra":    { id:"_2H_CLAYMORE",        weight:12, mat:"metal" },
+    "Espada Doble":        { id:"_2H_DUALSWORD",       weight:6,  mat:"metal" },
+    "Hacha":               { id:"_MAIN_AXE",           weight:6,  mat:"metal" },
+    "Gran Hacha":          { id:"_2H_AXE",             weight:14, mat:"metal" },
+    "Hacha de Batalla":    { id:"_2H_HALBERD",         weight:14, mat:"metal" },
+    "Martillo de Guerra":  { id:"_2H_HAMMER",          weight:14, mat:"metal" },
+    "Maza":                { id:"_MAIN_MACE",          weight:7,  mat:"metal" },
+    "Gran Maza":           { id:"_2H_MACE",            weight:14, mat:"metal" },
+    "Daga":                { id:"_MAIN_DAGGER",        weight:3,  mat:"metal" },
+    "Par de Dagas":        { id:"_2H_DAGGERPAIR",      weight:6,  mat:"metal" },
+    "Lanza":               { id:"_MAIN_SPEAR",         weight:6,  mat:"metal" },
+    "Pica":                { id:"_2H_SPEAR",           weight:10, mat:"metal" },
+    "Garrote":             { id:"_2H_QUARTERSTAFF",    weight:5,  mat:"wood"  },
+    "Mayal de Cadena":     { id:"_2H_FLAIL",           weight:9,  mat:"metal" },
+  },
+  /* ── ARMAS ÚNICAS / FACCIÓN ────────────────────────────── */
+  "Armas Únicas": {
+    "Patas de Oso":        { id:"_2H_DUALAXE_KEEPER", weight:8,  mat:"metal"  },
+    "Garras de Lobo":      { id:"_2H_CLAWPAIR",        weight:7,  mat:"hide"   },
+    "Espada de Carnicero": { id:"_2H_CLEAVER_HELL",    weight:14, mat:"metal"  },
+    "Mandoble Eterno":     { id:"_2H_DUALSWORD",       weight:12, mat:"metal"  },
+    "Martillo de Glaciar": { id:"_2H_GLACIALSTAFF",    weight:10, mat:"wood"   },
+    "Cimitarra":           { id:"_MAIN_SCIMITAR_MORGANA",weight:5, mat:"metal" },
+    "Espada Energía":      { id:"_2H_ENIGMATICSTAFF",  weight:9,  mat:"wood"   },
+    "Hoz de Alma":         { id:"_2H_SCYTHE_HELL",     weight:10, mat:"metal"  },
+    "Forja Infernal":      { id:"_2H_INFERNOSTAFF_MORGANA",weight:9,mat:"wood" },
+    "Tridente":            { id:"_2H_TRIDENT_UNDEAD",  weight:10, mat:"metal"  },
+  },
+  /* ── ARMAS A DISTANCIA ─────────────────────────────────── */
+  "Armas Distancia": {
+    "Arco":                { id:"_2H_BOW",             weight:7,  mat:"wood"  },
+    "Ballesta de Mano":    { id:"_MAIN_1HCROSSBOW",    weight:5,  mat:"wood"  },
+    "Ballesta Pesada":     { id:"_2H_CROSSBOW",        weight:10, mat:"wood"  },
+    "Arco de Guerra":      { id:"_2H_WARBOW",          weight:9,  mat:"wood"  },
+    "Arco Arcano":         { id:"_2H_LONGBOW",         weight:8,  mat:"wood"  },
+    "Ballesta de Raíz":    { id:"_2H_CROSSBOWLARGE",   weight:12, mat:"wood"  },
+    "Ballesta Energética": { id:"_2H_REPEATINGCROSSBOW_UNDEAD",weight:8, mat:"wood"  },
+  },
+  /* ── ARMAS MÁGICAS ─────────────────────────────────────── */
+  "Armas Mágicas": {
+    "Bastón de Fuego":     { id:"_MAIN_FIRESTAFF",     weight:5,  mat:"wood"  },
+    "Gran Bastón de Fuego":{ id:"_2H_FIRESTAFF",       weight:8,  mat:"wood"  },
+    "Bastón Ígneo":        { id:"_2H_INFERNOSTAFF",    weight:9,  mat:"wood"  },
+    "Bastón de Escarcha":  { id:"_MAIN_FROSTSTAFF",    weight:5,  mat:"wood"  },
+    "Bastón de Hielo":     { id:"_2H_ICEGAUNTLETS_HELL",weight:8,  mat:"metal" },
+    "Bastón Glacial":      { id:"_2H_FROSTSTAFF",      weight:9,  mat:"wood"  },
+    "Bastón Arcano":       { id:"_MAIN_ARCANESTAFF",   weight:5,  mat:"wood"  },
+    "Gran Bastón Arcano":  { id:"_2H_ARCANESTAFF",     weight:8,  mat:"wood"  },
+    "Bastón de Maldición": { id:"_MAIN_CURSEDSTAFF",   weight:5,  mat:"wood"  },
+    "Gran Maldición":      { id:"_2H_CURSEDSTAFF",     weight:8,  mat:"wood"  },
+    "Bastón de Naturaleza":{ id:"_MAIN_NATURESTAFF",   weight:5,  mat:"wood"  },
+    "Gran Bastón Natura":  { id:"_2H_NATURESTAFF",     weight:8,  mat:"wood"  },
+    "Báculo Sagrado":      { id:"_MAIN_HOLYSTAFF",     weight:5,  mat:"wood"  },
+    "Gran Báculo Sagrado": { id:"_2H_HOLYSTAFF",       weight:8,  mat:"wood"  },
+    "Guanteletes de Fuerza":{ id:"_2H_IRONCLADEDSTAFF",weight:9,  mat:"metal" },
+    "Flauta de Batalla":   { id:"_2H_SHAPESHIFTER_MORGANA",weight:7,mat:"wood"},
+    "Caduceo":             { id:"_2H_WILDSTAFF",       weight:9,  mat:"wood"  },
+  },
+  /* ── ARMAS OFF-HAND ────────────────────────────────────── */
+  "Off-Hand": {
+    "Escudo":              { id:"_OFF_SHIELD",         weight:5,  mat:"metal" },
+    "Orbe Arcano":         { id:"_OFF_ORB_MORGANA",    weight:3,  mat:"wood"  },
+    "Tomo de Hechizos":    { id:"_OFF_BOOK",           weight:2,  mat:"hide"  },
+    "Antorcha":            { id:"_OFF_TORCH",          weight:2,  mat:"wood"  },
+    "Cuerno de Batalla":   { id:"_OFF_HORN_KEEPER",    weight:3,  mat:"metal" },
+    "Cabeza Espiga":       { id:"_OFF_SPIKEDSHIELD_MORGANA",weight:5,  mat:"metal" },
+    "Farol":               { id:"_OFF_LAMP_UNDEAD",    weight:2,  mat:"metal" },
+  },
+  /* ── ARMADURA DE TELA ──────────────────────────────────── */
+  "Tela (Cabeza)": {
+    "Capucha de Erudito":  { id:"_HEAD_CLOTH_SET1",    weight:3,  mat:"cloth" },
+    "Capucha de Clérigo":  { id:"_HEAD_CLOTH_SET2",    weight:3,  mat:"cloth" },
+    "Casco de Hechicero":  { id:"_HEAD_CLOTH_SET3",    weight:3,  mat:"cloth" },
+  },
+  "Tela (Pecho)": {
+    "Hábito de Erudito":   { id:"_ARMOR_CLOTH_SET1",   weight:6,  mat:"cloth" },
+    "Hábito de Clérigo":   { id:"_ARMOR_CLOTH_SET2",   weight:6,  mat:"cloth" },
+    "Túnica de Hechicero": { id:"_ARMOR_CLOTH_SET3",   weight:6,  mat:"cloth" },
+  },
+  "Tela (Botas)": {
+    "Sandalias de Erudito":{ id:"_SHOES_CLOTH_SET1",   weight:2,  mat:"cloth" },
+    "Sandalias de Clérigo":{ id:"_SHOES_CLOTH_SET2",   weight:2,  mat:"cloth" },
+    "Botas de Hechicero":  { id:"_SHOES_CLOTH_SET3",   weight:2,  mat:"cloth" },
+  },
+  /* ── ARMADURA DE CUERO ─────────────────────────────────── */
+  "Cuero (Cabeza)": {
+    "Capucha de Cazador":  { id:"_HEAD_LEATHER_SET1",  weight:4,  mat:"hide"  },
+    "Capucha de Asesino":  { id:"_HEAD_LEATHER_SET2",  weight:4,  mat:"hide"  },
+    "Capucha de Guardabosques":{ id:"_HEAD_LEATHER_SET3",weight:4,mat:"hide"  },
+  },
+  "Cuero (Pecho)": {
+    "Chaqueta de Cazador": { id:"_ARMOR_LEATHER_SET1", weight:8,  mat:"hide"  },
+    "Chaqueta de Asesino": { id:"_ARMOR_LEATHER_SET2", weight:8,  mat:"hide"  },
+    "Chaqueta de Guardabosques":{ id:"_ARMOR_LEATHER_SET3",weight:8,mat:"hide"},
+  },
+  "Cuero (Botas)": {
+    "Botas de Cazador":    { id:"_SHOES_LEATHER_SET1", weight:3,  mat:"hide"  },
+    "Botas de Asesino":    { id:"_SHOES_LEATHER_SET2", weight:3,  mat:"hide"  },
+    "Botas de Guardabosques":{ id:"_SHOES_LEATHER_SET3",weight:3, mat:"hide"  },
+  },
+  /* ── ARMADURA DE PLACA ─────────────────────────────────── */
+  "Placa (Cabeza)": {
+    "Casco de Soldado":    { id:"_HEAD_PLATE_SET1",    weight:8,  mat:"metal" },
+    "Casco de Guardia":    { id:"_HEAD_PLATE_SET2",    weight:8,  mat:"metal" },
+    "Yelmo de Cruzado":    { id:"_HEAD_PLATE_SET3",    weight:8,  mat:"metal" },
+  },
+  "Placa (Pecho)": {
+    "Peto de Soldado":     { id:"_ARMOR_PLATE_SET1",   weight:16, mat:"metal" },
+    "Peto de Guardia":     { id:"_ARMOR_PLATE_SET2",   weight:16, mat:"metal" },
+    "Peto de Cruzado":     { id:"_ARMOR_PLATE_SET3",   weight:16, mat:"metal" },
+  },
+  "Placa (Botas)": {
+    "Botas de Soldado":    { id:"_SHOES_PLATE_SET1",   weight:5,  mat:"metal" },
+    "Botas de Guardia":    { id:"_SHOES_PLATE_SET2",   weight:5,  mat:"metal" },
+    "Botas de Cruzado":    { id:"_SHOES_PLATE_SET3",   weight:5,  mat:"metal" },
+  },
+  /* ── CAPAS ─────────────────────────────────────────────── */
+  "Capas": {
+    "Capa de Erudito":     { id:"_CAPE",                   weight:1,  mat:"cloth" },
+    "Capa de Thetford":    { id:"_CAPEITEM_FW_THETFORD",   weight:1,  mat:"cloth" },
+    "Capa de Martlock":    { id:"_CAPEITEM_FW_MARTLOCK",   weight:1,  mat:"cloth" },
+    "Capa de Lymhurst":    { id:"_CAPEITEM_FW_LYMHURST",   weight:1,  mat:"cloth" },
+    "Capa de Bridgewatch": { id:"_CAPEITEM_FW_BRIDGEWATCH",weight:1,  mat:"cloth" },
+    "Capa de Fort Ster.":  { id:"_CAPEITEM_FW_FORTSTERLING",weight:1, mat:"cloth" },
+    "Capa de Caerleon":    { id:"_CAPEITEM_FW_CAERLEON",   weight:1,  mat:"cloth" },
+    "Capa de Arena":       { id:"_CAPE_ARENA",             weight:1,  mat:"cloth" },
+    "Capa de Demonio":     { id:"_CAPEITEM_DEMON",         weight:1,  mat:"cloth" },
+    "Capa de No-muerto":   { id:"_CAPEITEM_UNDEAD",        weight:1,  mat:"cloth" },
+    "Capa de Guardián":    { id:"_CAPEITEM_KEEPER",        weight:1,  mat:"cloth" },
+    "Capa de Morgana":     { id:"_CAPEITEM_MORGANA",       weight:1,  mat:"cloth" },
+  },
+  /* ── MATERIALES REFINADOS ──────────────────────────────── */
+  "Barras de Metal": {
+    "Barra de Cobre":      { id:"_METALBAR",           weight:4,  mat:null, tier:"T2" },
+    "Lingote de Bronce":   { id:"_METALBAR",           weight:4,  mat:null, tier:"T3" },
+    "Lingote de Acero":    { id:"_METALBAR",           weight:4,  mat:null, tier:"T4" },
+    "Acero Templado":      { id:"_METALBAR",           weight:4,  mat:null, tier:"T5" },
+    "Tungsteno":           { id:"_METALBAR",           weight:4,  mat:null, tier:"T6" },
+    "Aciprex":             { id:"_METALBAR",           weight:4,  mat:null, tier:"T7" },
+    "Celestium":           { id:"_METALBAR",           weight:4,  mat:null, tier:"T8" },
+    "Adamantium":          { id:"_METALBAR",           weight:4,  mat:null, tier:"T8" },
+  },
+  "Tablones de Madera": {
+    "Tablón de Roble":     { id:"_PLANKS",             weight:3,  mat:null, tier:"T2" },
+    "Tablón de Abedul":    { id:"_PLANKS",             weight:3,  mat:null, tier:"T3" },
+    "Tablón de Pino":      { id:"_PLANKS",             weight:3,  mat:null, tier:"T4" },
+    "Tablón de Cedro":     { id:"_PLANKS",             weight:3,  mat:null, tier:"T5" },
+    "Tablón de Afane":     { id:"_PLANKS",             weight:3,  mat:null, tier:"T6" },
+    "Tablón de Tejo":      { id:"_PLANKS",             weight:3,  mat:null, tier:"T7" },
+    "Tablón de Fresno":    { id:"_PLANKS",             weight:3,  mat:null, tier:"T8" },
+    "Tablón Madera Negra": { id:"_PLANKS",             weight:3,  mat:null, tier:"T8" },
+  },
+  "Tela Refinada": {
+    "Tela Simple":         { id:"_CLOTH",              weight:2,  mat:null, tier:"T2" },
+    "Tela de Escamas":     { id:"_CLOTH",              weight:2,  mat:null, tier:"T3" },
+    "Tela de Seda":        { id:"_CLOTH",              weight:2,  mat:null, tier:"T4" },
+    "Tela de Trinium":     { id:"_CLOTH",              weight:2,  mat:null, tier:"T5" },
+    "Tela de Wisp":        { id:"_CLOTH",              weight:2,  mat:null, tier:"T6" },
+    "Tela de Aracne":      { id:"_CLOTH",              weight:2,  mat:null, tier:"T7" },
+    "Tela de Espectro":    { id:"_CLOTH",              weight:2,  mat:null, tier:"T8" },
+    "Tela de Caos":        { id:"_CLOTH",              weight:2,  mat:null, tier:"T8" },
+  },
+  "Cuero Refinado": {
+    "Cuero de Cerdo":      { id:"_LEATHER",            weight:3,  mat:null, tier:"T2" },
+    "Cuero de Zorro":      { id:"_LEATHER",            weight:3,  mat:null, tier:"T3" },
+    "Cuero de Oso":        { id:"_LEATHER",            weight:3,  mat:null, tier:"T4" },
+    "Cuero de Lobo":       { id:"_LEATHER",            weight:3,  mat:null, tier:"T5" },
+    "Cuero de Oso de Luz": { id:"_LEATHER",            weight:3,  mat:null, tier:"T6" },
+    "Cuero de Bestia":     { id:"_LEATHER",            weight:3,  mat:null, tier:"T7" },
+    "Cuero Dorado":        { id:"_LEATHER",            weight:3,  mat:null, tier:"T8" },
+    "Cuero Etéreo":        { id:"_LEATHER",            weight:3,  mat:null, tier:"T8" },
+  },
+  /* ── CONSUMIBLES ───────────────────────────────────────── */
+  "Comida": {
+    "Ensalada":            { id:"_MEAL_SALAD",         weight:1,  mat:null },
+    "Estofado":            { id:"_MEAL_STEW",          weight:1,  mat:null },
+    "Sándwich":            { id:"_MEAL_SANDWICH",      weight:1,  mat:null },
+    "Tortilla":            { id:"_MEAL_OMELETTE",      weight:1,  mat:null, tier:"T3" },
+    "Pastel de Carne":     { id:"_MEAL_PIE",           weight:1,  mat:null, tier:"T3" },
+    "Sopa":                { id:"_MEAL_SOUP",          weight:1,  mat:null, tier:"T1" },
+    "Asado":               { id:"_MEAL_ROAST",         weight:1,  mat:null, tier:"T3" },
+    "Pan":                 { id:"_MEAL_BREAD",         weight:1,  mat:null },
+  },
+  "Pociones": {
+    "Poción de Curación":  { id:"_POTION_HEAL",        weight:.5, mat:null },
+    "Poción de Energía":   { id:"_POTION_ENERGY",      weight:.5, mat:null },
+    "Poción de Veneno":    { id:"_POTION_COOLDOWN",    weight:.5, mat:null },
+    "Poc. de Invisibilidad":{id:"_POTION_CLEANSE",    weight:.5, mat:null, tier:"T8" },
+    "Poción de Piedra":    { id:"_POTION_STONESKIN",   weight:.5, mat:null, tier:"T3" },
+    "Poción de Gigante":   { id:"_POTION_REVIVE",      weight:.5, mat:null, tier:"T3" },
+    "Poción de Frio":      { id:"_POTION_SLOWFIELD",   weight:.5, mat:null, tier:"T3" },
+  },
+  /* ── MONTURAS ──────────────────────────────────────────── */
+  "Monturas": {
+    "Mula de Carga":       { id:"_MOUNT_MULE",          weight:0,  mat:null, tier:"T2" },
+    "Buey":                { id:"_MOUNT_OX",            weight:0,  mat:null, tier:"T3" },
+    "Corcel de Guardia":   { id:"_MOUNT_HORSE",         weight:0,  mat:null, tier:"T3" },
+    "Corcel de Batalla":   { id:"_MOUNT_ARMORED_HORSE", weight:0,  mat:null, tier:"T5" },
+    "Lobo Sanguinario":    { id:"_MOUNT_DIREWOLF",      weight:0,  mat:null, tier:"T6" },
+    "Jabalí de Guerra":    { id:"_MOUNT_DIREBOAR",      weight:0,  mat:null, tier:"T7" },
+    "Ciervo Gigante":      { id:"_MOUNT_GIANTSTAG",     weight:0,  mat:null, tier:"T4" },
+    "Alce de Invierno":    { id:"_MOUNT_GIANTSTAG_MOOSE",weight:0, mat:null, tier:"T6" },
+    "Gato de Éter":        { id:"_MOUNT_COUGAR_KEEPER", weight:0,  mat:null, tier:"T5" },
+    "Oso de Guerra":       { id:"_MOUNT_DIREBEAR",      weight:0,  mat:null, tier:"T8" },
+    "Salamandra":          { id:"_MOUNT_SWAMPDRAGON",   weight:0,  mat:null, tier:"T7" },
+    "Mamut de Carga":      { id:"_MOUNT_MAMMOTH_TRANSPORT",weight:0,mat:null, tier:"T8" },
+  },
+  /* ── MATERIAS PRIMAS ────────────────────────────────────── */
+  "Materias Primas": {
+    "Madera":              { id:"_WOOD",               weight:2,  mat:null },
+    "Piedra":              { id:"_ROCK",               weight:3,  mat:null },
+    "Mineral":             { id:"_ORE",                weight:2,  mat:null },
+    "Piel":                { id:"_HIDE",               weight:1,  mat:null },
+    "Fibra":               { id:"_FIBER",              weight:1,  mat:null },
+  },
+  "Bloques de Piedra": {
+    "Bloques de Piedra":   { id:"_STONEBLOCK",         weight:3,  mat:null },
+  },
+  /* ── ARTE FACTOS ──────────────────────────────────────────── */
+  "Artefactos": {
+    "Orbe Oculto":           { id:"_ARTEFACT_2H_ARCANESTAFF_HELL",    weight:1, mat:null, tier:"T4" },
+    "Arco Infernal":         { id:"_ARTEFACT_2H_BOW_HELL",            weight:1, mat:null, tier:"T4" },
+    "Calavera Maldita":      { id:"_ARTEFACT_2H_CURSEDSTAFF_MORGANA",  weight:1, mat:null, tier:"T4" },
+    "Bastón Infernal":       { id:"_ARTEFACT_2H_FIRESTAFF_HELL",      weight:1, mat:null, tier:"T4" },
+    "Bastón Glacial":        { id:"_ARTEFACT_2H_ICEGAUNTLETS_HELL",   weight:1, mat:null, tier:"T4" },
+    "Martillo Infernal":     { id:"_ARTEFACT_2H_DUALHAMMER_HELL",     weight:1, mat:null, tier:"T4" },
+    "Maza Morgana":          { id:"_ARTEFACT_2H_MACE_MORGANA",        weight:1, mat:null, tier:"T4" },
+    "Cazador de Espíritus":  { id:"_ARTEFACT_MAIN_SPEAR_KEEPER",      weight:1, mat:null, tier:"T4" },
+    "Ballesta Infernal":     { id:"_ARTEFACT_2H_DUALCROSSBOW_HELL",   weight:1, mat:null, tier:"T4" },
+    "Daga Ávalon":           { id:"_ARTEFACT_2H_DAGGER_KATAR_AVALON", weight:1, mat:null, tier:"T4" },
+    "Pica Morgana":          { id:"_ARTEFACT_2H_COMBATSTAFF_MORGANA",  weight:1, mat:null, tier:"T4" },
+    "Guanteletes Infernales":{ id:"_ARTEFACT_2H_IRONGAUNTLETS_HELL",  weight:1, mat:null, tier:"T4" },
+    "Guadaña Infernal":      { id:"_ARTEFACT_2H_CLEAVER_HELL",        weight:1, mat:null, tier:"T4" },
+    "Arco Largo Maldito":    { id:"_ARTEFACT_2H_LONGBOW_UNDEAD",      weight:1, mat:null, tier:"T4" },
+    "Bastón Salvaje":        { id:"_ARTEFACT_2H_NATURESTAFF_KEEPER",  weight:1, mat:null, tier:"T4" },
+    "Llamasombras":          { id:"_ARTEFACT_2H_ENIGMATICORB_MORGANA", weight:1, mat:null, tier:"T4" },
+    "Yelmo Infernal":        { id:"_ARTEFACT_HEAD_PLATE_HELL",        weight:1, mat:null, tier:"T4" },
+    "Peto Infernal":         { id:"_ARTEFACT_ARMOR_PLATE_HELL",       weight:1, mat:null, tier:"T4" },
+    "Botas Infernales":      { id:"_ARTEFACT_SHOES_PLATE_HELL",       weight:1, mat:null, tier:"T4" },
+    "Capucha Infernal":      { id:"_ARTEFACT_HEAD_CLOTH_HELL",        weight:1, mat:null, tier:"T4" },
+    "Túnica Infernal":       { id:"_ARTEFACT_ARMOR_CLOTH_HELL",       weight:1, mat:null, tier:"T4" },
+    "Sandalias Infernales":  { id:"_ARTEFACT_SHOES_CLOTH_HELL",       weight:1, mat:null, tier:"T4" },
+  },
+  /* ── RUNAS / ALMAS / RELIQUIAS ────────────────────────────── */
+  "Runas, Almas y Reliquias": {
+    "Runa":                  { id:"_RUNE",              weight:.5, mat:null, tier:"T4" },
+    "Alma":                  { id:"_SOUL",              weight:.7, mat:null, tier:"T4" },
+    "Reliquia":              { id:"_RELIC",             weight:1,  mat:null, tier:"T4" },
+    "Fragmento Avaloniano":  { id:"_SHARD_AVALONIAN",   weight:.5, mat:null, tier:"T4" },
+    "Esencia":               { id:"_ESSENCE",           weight:.3, mat:null, tier:"T4" },
+  },
+  /* ── DIARIOS ──────────────────────────────────────────────── */
+  "Diarios": {
+    "Diario de Leñador":     { id:"_JOURNAL_WOOD",      weight:.5, mat:null, tier:"T2" },
+    "Diario de Cantero":     { id:"_JOURNAL_STONE",     weight:.5, mat:null, tier:"T2" },
+    "Diario de Minero":      { id:"_JOURNAL_ORE",       weight:.5, mat:null, tier:"T2" },
+    "Diario de Recolector":  { id:"_JOURNAL_FIBER",     weight:.5, mat:null, tier:"T2" },
+    "Diario de Desollador":  { id:"_JOURNAL_HIDE",      weight:.5, mat:null, tier:"T2" },
+    "Diario de Pescador":    { id:"_JOURNAL_FISHING",    weight:.5, mat:null, tier:"T4" },
+    "Diario de Guerrero":    { id:"_JOURNAL_WARRIOR",    weight:.5, mat:null, tier:"T4" },
+    "Diario de Cazador":     { id:"_JOURNAL_HUNTER",     weight:.5, mat:null, tier:"T4" },
+    "Diario de Mago":        { id:"_JOURNAL_MAGE",       weight:.5, mat:null, tier:"T4" },
+    "Diario de Artesano":    { id:"_JOURNAL_TOOLMAKER",  weight:.5, mat:null, tier:"T4" },
+    "Diario de Mercenario":  { id:"_JOURNAL_MERCENARY",  weight:.5, mat:null, tier:"T4" },
+  },
+  /* ── BOLSAS / MOCHILAS ────────────────────────────────────── */
+  "Bolsas": {
+    "Bolsa":                 { id:"_BAG",               weight:1,  mat:null, tier:"T2" },
+    "Bolsa de Perspicacia":  { id:"_BAG_INSIGHT",       weight:1,  mat:null, tier:"T4" },
+  },
+  /* ── OFFHANDS (MANO SECUNDARIA) ───────────────────────────── */
+  "Offhands": {
+    "Escudo":                { id:"_OFF_SHIELD",        weight:5,  mat:null, tier:"T1" },
+    "Libro":                 { id:"_OFF_BOOK",          weight:3,  mat:null, tier:"T2" },
+    "Antorcha":              { id:"_OFF_TORCH",         weight:3,  mat:null, tier:"T3" },
+    "Grimorio":              { id:"_OFF_TOME",          weight:2,  mat:null, tier:"T4" },
+    "Lámpara":               { id:"_OFF_LAMP",          weight:3,  mat:null, tier:"T4" },
+    "Cuerno de Guerra":      { id:"_OFF_HORN",          weight:4,  mat:null, tier:"T4" },
+    "Escudo con Púas":       { id:"_OFF_SPIKEDSHIELD",  weight:5,  mat:null, tier:"T4" },
+    "Orbe":                  { id:"_OFF_ORB",           weight:2,  mat:null, tier:"T4" },
+    "Incensario":            { id:"_OFF_CENSER",        weight:3,  mat:null, tier:"T4" },
+    "Talismán":              { id:"_OFF_TALISMAN",      weight:2,  mat:null, tier:"T4" },
+    "Bastón de Bufón":       { id:"_OFF_JESTERCANE",    weight:3,  mat:null, tier:"T4" },
+    "Tótem":                 { id:"_OFF_TOTEM",         weight:3,  mat:null, tier:"T4" },
+    "Calavera de Demonio":   { id:"_OFF_DEMONSKULL",    weight:2,  mat:null, tier:"T4" },
+    "Ataúd":                 { id:"_OFF_SARCOPHAGUS",   weight:4,  mat:null, tier:"T4" },
+    "Llamanieblas":          { id:"_OFF_MISTCALLER",    weight:3,  mat:null, tier:"T4" },
+    "Torcha":                { id:"_OFF_FIREBUG",       weight:2,  mat:null, tier:"T4" },
+  },
+  /* ── SEMILLAS ─────────────────────────────────────────────── */
+  "Semillas": {
+    "Semilla de Zanahoria":  { id:"_FARM_CARROT_SEED",  weight:.2, mat:null, tier:"T1" },
+    "Semilla de Frijol":     { id:"_FARM_BEAN_SEED",    weight:.2, mat:null, tier:"T2" },
+    "Semilla de Trigo":      { id:"_FARM_WHEAT_SEED",   weight:.2, mat:null, tier:"T3" },
+    "Semilla de Nabo":       { id:"_FARM_TURNIP_SEED",  weight:.2, mat:null, tier:"T4" },
+    "Semilla de Repollo":    { id:"_FARM_CABBAGE_SEED", weight:.2, mat:null, tier:"T5" },
+    "Semilla de Papa":       { id:"_FARM_POTATO_SEED",  weight:.2, mat:null, tier:"T6" },
+    "Semilla de Maíz":       { id:"_FARM_CORN_SEED",    weight:.2, mat:null, tier:"T7" },
+    "Semilla de Calabaza":   { id:"_FARM_PUMPKIN_SEED", weight:.2, mat:null, tier:"T8" },
+    "Semilla de Agaric":     { id:"_FARM_AGARIC_SEED",  weight:.2, mat:null, tier:"T2" },
+    "Semilla de Bardana":    { id:"_FARM_BURDOCK_SEED", weight:.2, mat:null, tier:"T3" },
+    "Semilla de Cardo":      { id:"_FARM_TEASEL_SEED",  weight:.2, mat:null, tier:"T4" },
+    "Semilla de Consuelda":  { id:"_FARM_COMFREY_SEED", weight:.2, mat:null, tier:"T5" },
+    "Semilla de Digital":    { id:"_FARM_FOXGLOVE_SEED",weight:.2, mat:null, tier:"T6" },
+    "Semilla de Gordolobo":  { id:"_FARM_MULLEIN_SEED", weight:.2, mat:null, tier:"T7" },
+    "Semilla de Milenrama":  { id:"_FARM_YARROW_SEED",  weight:.2, mat:null, tier:"T8" },
+  },
+  /* ── COSECHAS ─────────────────────────────────────────────── */
+  "Cosechas": {
+    "Zanahoria":             { id:"_CARROT",            weight:.5, mat:null, tier:"T1" },
+    "Frijol":                { id:"_BEAN",              weight:.5, mat:null, tier:"T2" },
+    "Trigo":                 { id:"_WHEAT",             weight:.5, mat:null, tier:"T3" },
+    "Nabo":                  { id:"_TURNIP",            weight:.5, mat:null, tier:"T4" },
+    "Repollo":               { id:"_CABBAGE",           weight:.5, mat:null, tier:"T5" },
+    "Papa":                  { id:"_POTATO",            weight:.5, mat:null, tier:"T6" },
+    "Maíz":                  { id:"_CORN",              weight:.5, mat:null, tier:"T7" },
+    "Calabaza":              { id:"_PUMPKIN",           weight:.5, mat:null, tier:"T8" },
+  },
+  /* ── ANIMALES DE GRANJA ───────────────────────────────────── */
+  "Animales de Granja": {
+    "Pollito":               { id:"_FARM_CHICKEN_BABY",  weight:2,  mat:null, tier:"T3" },
+    "Potro":                 { id:"_FARM_HORSE_BABY",    weight:3,  mat:null, tier:"T3" },
+    "Cabrito":               { id:"_FARM_GOAT_BABY",     weight:3,  mat:null, tier:"T4" },
+    "Ansarón":               { id:"_FARM_GOOSE_BABY",    weight:3,  mat:null, tier:"T5" },
+    "Cordero":               { id:"_FARM_SHEEP_BABY",    weight:3,  mat:null, tier:"T6" },
+    "Cerdito":               { id:"_FARM_PIG_BABY",      weight:3,  mat:null, tier:"T7" },
+    "Ternero":               { id:"_FARM_COW_BABY",      weight:4,  mat:null, tier:"T8" },
+    "Becerro de Buey":       { id:"_FARM_OX_BABY",       weight:4,  mat:null, tier:"T8" },
+    "Pollo":                 { id:"_FARM_CHICKEN_GROWN", weight:3,  mat:null, tier:"T3" },
+    "Caballo de Granja":     { id:"_FARM_HORSE_GROWN",   weight:4,  mat:null, tier:"T3" },
+    "Cabra":                 { id:"_FARM_GOAT_GROWN",    weight:4,  mat:null, tier:"T4" },
+    "Ganso":                 { id:"_FARM_GOOSE_GROWN",   weight:4,  mat:null, tier:"T5" },
+    "Oveja":                 { id:"_FARM_SHEEP_GROWN",   weight:4,  mat:null, tier:"T6" },
+    "Cerdo":                 { id:"_FARM_PIG_GROWN",     weight:4,  mat:null, tier:"T7" },
+    "Vaca":                  { id:"_FARM_COW_GROWN",     weight:5,  mat:null, tier:"T8" },
+    "Buey de Granja":        { id:"_FARM_OX_GROWN",      weight:5,  mat:null, tier:"T8" },
+  },
+  /* ── PRODUCTOS DE GRANJA ──────────────────────────────────── */
+  "Productos de Granja": {
+    "Harina":                { id:"_FLOUR",   weight:.3, mat:null, tier:"T3" },
+    "Pan":                   { id:"_BREAD",   weight:.5, mat:null, tier:"T4" },
+    "Huevo":                 { id:"_EGG",     weight:.3, mat:null, tier:"T3" },
+    "Leche":                 { id:"_MILK",    weight:.5, mat:null, tier:"T4" },
+    "Mantequilla":           { id:"_BUTTER",  weight:.6, mat:null, tier:"T4" },
+    "Alcohol":               { id:"_ALCOHOL", weight:.6, mat:null, tier:"T6" },
+    "Carne":                 { id:"_MEAT",    weight:.5, mat:null, tier:"T3" },
+    "Huevo (T5)":            { id:"_EGG",     weight:.3, mat:null, tier:"T5" },
+    "Leche (T6)":            { id:"_MILK",    weight:.5, mat:null, tier:"T6" },
+    "Leche (T8)":            { id:"_MILK",    weight:.5, mat:null, tier:"T8" },
+  },
+  /* ── PESCADOS ─────────────────────────────────────────────── */
+  "Pescados": {
+    "Perca":                 { id:"_FISH_FRESHWATER_ALL_COMMON", weight:1, mat:null, tier:"T1" },
+    "Trucha":                { id:"_FISH_FRESHWATER_ALL_COMMON", weight:1, mat:null, tier:"T2" },
+    "Lucio":                 { id:"_FISH_FRESHWATER_ALL_COMMON", weight:1, mat:null, tier:"T3" },
+    "Salmón":                { id:"_FISH_FRESHWATER_ALL_COMMON", weight:1, mat:null, tier:"T4" },
+    "Carpa":                 { id:"_FISH_FRESHWATER_ALL_COMMON", weight:1, mat:null, tier:"T5" },
+    "Esturión":              { id:"_FISH_FRESHWATER_ALL_COMMON", weight:1, mat:null, tier:"T6" },
+    "Anguila":               { id:"_FISH_FRESHWATER_ALL_COMMON", weight:1, mat:null, tier:"T7" },
+    "Pez de Fondo":          { id:"_FISH_FRESHWATER_ALL_COMMON", weight:1, mat:null, tier:"T8" },
+    "Arenque":               { id:"_FISH_SALTWATER_ALL_COMMON",  weight:1, mat:null, tier:"T1" },
+    "Caballa":               { id:"_FISH_SALTWATER_ALL_COMMON",  weight:1, mat:null, tier:"T2" },
+    "Bacalao":               { id:"_FISH_SALTWATER_ALL_COMMON",  weight:1, mat:null, tier:"T3" },
+    "Róbalo":                { id:"_FISH_SALTWATER_ALL_COMMON",  weight:1, mat:null, tier:"T4" },
+    "Atún":                  { id:"_FISH_SALTWATER_ALL_COMMON",  weight:1, mat:null, tier:"T5" },
+    "Pez Espada":            { id:"_FISH_SALTWATER_ALL_COMMON",  weight:1, mat:null, tier:"T6" },
+    "Tiburón":               { id:"_FISH_SALTWATER_ALL_COMMON",  weight:1, mat:null, tier:"T7" },
+    "Manta Raya":            { id:"_FISH_SALTWATER_ALL_COMMON",  weight:1, mat:null, tier:"T8" },
+  },
+
+};
+
+/* ── Materiales de crafteo por tipo de ítem ── */
+const CM = {
+  metal: [{name:"Lingote refinado",  key:"bar",  base:16}],
+  wood:  [{name:"Tablón refinado",   key:"plk",  base:16}],
+  cloth: [{name:"Tela refinada",     key:"clt",  base:16}],
+  hide:  [{name:"Cuero refinado",    key:"lth",  base:16}],
+};
+
+/* ── Constantes de juego ── */
+const RRA = { base: 0.152, bonus: 0.375, focus: 0.479 };
+const CBONUS = {
+  Lymhurst:      ['hide'],
+  Martlock:      ['wood'],
+  Bridgewatch:   ['rock'],
+  'Fort Sterling':['cloth'],
+  Thetford:      ['metal'],
+  Caerleon:      [],
+  Brecilien:     ['all']
+};
+const CITIES = ['Lymhurst','Martlock','Bridgewatch','Thetford','Fort Sterling','Caerleon','Black Market','Brecilien'];
+
+/* ── Enchantment material quantities by item slot ── */
+function getEnchantQty(itemId) {
+  if (!itemId) return 96;
+  if (itemId.includes('_2H_')) return 384;
+  if (itemId.includes('_MAIN_')) return 288;
+  if (itemId.includes('_ARMOR_')) return 192;
+  if (itemId.includes('_BAG')) return 192;
+  if (itemId.includes('_HEAD_')) return 96;
+  if (itemId.includes('_SHOES_')) return 96;
+  if (itemId.includes('_OFF_')) return 96;
+  if (itemId.includes('_CAPE')) return 96;
+  return 96;
+}
+function getMatIdForEnchant(level, tier) {
+  const baseIds = {1:'_RUNE',2:'_SOUL',3:'_RELIC',4:'_SHARD_AVALONIAN'};
+  return tier + (baseIds[level] || '_RUNE');
+}
+function getMatName(level) {
+  return {1:'Runas',2:'Almas',3:'Reliquias',4:'Fragmentos Avalonianos'}[level] || 'Runas';
+}
+
+/* ════ API CENTRALIZADA ════
+   fetchPrices: obtiene precios de la API con quality=1 siempre
+   Retorna array de resultados parseados
+   - itemIds: string o array de IDs
+   - locations: string de ciudades separadas por comas
+   - quality: siempre 1 (calidad normal)
+════════════════════════════════════════════════════ */
+async function fetchPrices(itemIds, locations) {
+  const ids = Array.isArray(itemIds) ? itemIds.join(',') : itemIds;
+  const url = 'https://' + srv() + '.albion-online-data.com/api/v2/stats/prices/' + ids + '.json?locations=' + (locations || CITIES.join(',')) + '&quality=1';
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!Array.isArray(data)) return [];
+  return data.filter(d => d.quality === 1);
+}
+
+/* ════ ESTADO GLOBAL ════ */
+let p1filter = 'all';
+let p1data   = [];
+let lastUpdate = null;
+let _acPicking = false;
+/* currentItem guarda el ítem seleccionado para cada módulo */
+const CUR = { p1: null, fl: null, rt: null, cr: null };
+
+/* ════ UTILIDADES ════ */
+const $ = id => document.getElementById(id);
+const N  = v  => Number.isFinite(v) ? Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : '—';
+const Pct= v  => Number.isFinite(v) ? (v >= 0 ? '+' : '') + v.toFixed(2).replace('.', ',') + '%' : '—';
+const Pr = v  => Number.isFinite(v) ? (v >= 0 ? '+' : '') + N(v) : '—';
+const srv= ()  => $('SRV').value;
+
+function tx(id, v){ const e=$(id); if(e) e.textContent = v; }
+function ih(id, v){ const e=$(id); if(e) e.innerHTML   = v; }
+
+function showAl(id, msg, cls){
+  const e = $(id);
+  if (!e) return;
+  e.className = 'al show ' + cls;
+  e.innerHTML = msg;
+}
+function hideAl(id){ const e=$(id); if(e) e.className='al'; }
+
+/* ── IMÁGENES
+   URL oficial: https://render.albiononline.com/v1/item/{ID}.png?count=1&quality={1-5}
+   Si falla → placeholder SVG gris neutro
+   NO usar JSON.stringify, NO usar inline onclick con variables —
+   todo se maneja por addEventListener o dataset
+── */
+const PH = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='8' fill='%23DDD0BE'/%3E%3Ctext x='40' y='46' text-anchor='middle' font-size='9' fill='%238A7664' font-family='sans-serif'%3ESin%20img%3C/text%3E%3C/svg%3E";
+
+function sanitizeId(id) { return (id||'').replace(/[^a-zA-Z0-9_@-]/g, ''); }
+function iurl(itemId, q){ return 'https://render.albiononline.com/v1/item/' + sanitizeId(itemId) + '.png?count=1&quality=' + (q||1); }
+
+function setImg(elId, itemId, q){
+  const el = $(elId);
+  if (!el) return;
+  if (!itemId){ el.src = PH; return; }
+  el.onerror = function(){ this.onerror=null; this.src=PH; };
+  el.src = iurl(itemId, q || 1);
+}
+function imgErr(el){ el.onerror=null; el.src=PH; }
+
+/* ════ MODAL AYUDA ════ */
+$('helpBtn').addEventListener('click', ()  => $('OVL').classList.add('open'));
+$('mdlX')   .addEventListener('click', ()  => $('OVL').classList.remove('open'));
+$('OVL')    .addEventListener('click', (e) => { if (e.target === $('OVL')) $('OVL').classList.remove('open'); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('OVL').classList.remove('open'); });
+
+/* ════ NAVEGACIÓN ════
+   Usamos dataset en los botones de nav para evitar problemas de scope
+════ */
+document.querySelectorAll('.ni').forEach(btn => {
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.ni') .forEach(n => n.classList.remove('on'));
+    $(this.dataset.tab).classList.add('on');
+    this.classList.add('on');
+    closeAllAC();
+  });
+});
+
+/* ════ TOGGLES ════ */
+function setupTgg(groupId){
+  const g = $(groupId);
+  if (!g) return;
+  g.querySelectorAll('.tgb').forEach(btn => {
+    btn.addEventListener('click', function(){
+      g.querySelectorAll('.tgb').forEach(b => b.classList.remove('on'));
+      this.classList.add('on');
+    });
+  });
+}
+function tgIdx(groupId){
+  return [...$(groupId).querySelectorAll('.tgb')].findIndex(b => b.classList.contains('on'));
+}
+['rtprem','crtax'].forEach(setupTgg);
+
+/* ════ AUTOCOMPLETE ════
+   FIX COMPLETO:
+   - NO usamos JSON.stringify dentro de onclick="..." del innerHTML
+   - NO concatenamos variables de ítem dentro de strings HTML
+   - Usamos dataset.cat y dataset.nm en cada fila
+   - Usamos addEventListener('click') en cada fila del DOM
+   - Esto funciona con cualquier caracter: tildes, ñ, comillas, etc.
+════ */
+function closeAllAC(){
+  document.querySelectorAll('.abox').forEach(b => b.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.sw')) closeAllAC();
+});
+
+/* Normaliza: quita acentos para búsqueda */
+function norm(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+
+function buildAC(inputId, boxId, mod){
+  if (_acPicking) return;
+  const q   = norm($(inputId).value);
+  const box = $(boxId);
+  if (q.length < 2){ box.classList.remove('open'); return; }
+  const res = [];
+  outer: for (const cat in DB){
+    for (const nm in DB[cat]){
+      if (norm(nm).includes(q) || norm(cat).includes(q)){
+        res.push({ cat, nm, d: DB[cat][nm] });
+        if (res.length >= 12) break outer;
+      }
+    }
+  }
+  if (!res.length){ box.classList.remove('open'); return; }
+
+  /* Limpiar y reconstruir el DOM limpiamente */
+  box.innerHTML = '';
+  res.forEach(r => {
+    const fid = (r.d.tier || 'T4') + r.d.id;
+    const row = document.createElement('div');
+    row.className = 'arow';
+    /* dataset: sin concatenación de strings problemáticos en HTML */
+    row.dataset.cat = r.cat;
+    row.dataset.nm  = r.nm;
+    row.dataset.mod = mod;
+
+    const img = document.createElement('img');
+    img.src    = iurl(fid);
+    img.onerror= function(){ this.onerror=null; this.src=PH; };
+    img.width  = 24; img.height = 24;
+
+    const txt = document.createElement('div');
+    const nm2 = document.createElement('div');
+    nm2.textContent = r.nm;
+    const id2 = document.createElement('div');
+    id2.className   = 'arow-id';
+    id2.textContent = r.cat + ' · ' + fid;
+    txt.appendChild(nm2);
+    txt.appendChild(id2);
+
+    row.appendChild(img);
+    row.appendChild(txt);
+
+    /* Click: usa los datos del dataset, no closures con variables */
+    row.addEventListener('click', function(){
+      closeAllAC();
+      onPick(this.dataset.mod, this.dataset.cat, this.dataset.nm);
+    });
+
+    box.appendChild(row);
+  });
+  box.classList.add('open');
+}
+
+/* Conectar inputs de búsqueda con buildAC */
+$('p1q').addEventListener('input', () => buildAC('p1q','p1box','p1'));
+$('flq').addEventListener('input', () => buildAC('flq','flbox','fl'));
+$('rtq').addEventListener('input', () => buildAC('rtq','rtbox','rt'));
+$('crq').addEventListener('input', () => buildAC('crq','crbox','cr'));
+
+/* Selección de ítem — despacha al módulo correcto */
+function onPick(mod, cat, nm){
+  if (!DB[cat] || !DB[cat][nm]) return;
+  _acPicking = true;
+  CUR[mod] = { cat, nm, d: DB[cat][nm] };
+  if (mod === 'p1'){
+    $('p1q').value = nm;
+    $('p1cat').value = cat;
+    p1loadSubs(nm);
+    syncTierDropdown();
+    p1preview();
+  }
+  if (mod === 'fl'){
+    $('flq').value = nm;
+    flPreview();
+  }
+  if (mod === 'rt'){
+    $('rtq').value  = nm;
+    $('rtwpu').value = DB[cat][nm].weight || 0;
+    rtPreview();
+  }
+  if (mod === 'cr'){
+    $('crq').value = nm;
+    crPreview(); crMats(); crRRA();
+  }
+  setTimeout(() => _acPicking = false, 50);
+}
+
+/* ════ FILTROS PRECIOS ════ */
+function setFilter(f){
+  p1filter = f;
+  document.querySelectorAll('#T1 .chip').forEach(c => {
+    c.classList.toggle('on', c.dataset.f === f);
+  });
+  renderP1(p1data);
+}
+document.querySelectorAll('#T1 .chip').forEach(chip => {
+  chip.addEventListener('click', function(){
+    setFilter(this.dataset.f);
+  });
+});
+
+/* ════════════════════════════════════════════════════
+   TAB 1 — PRECIOS HOY
+════════════════════════════════════════════════════ */
+function initCats(){
+  const s = $('p1cat');
+  s.innerHTML = '';
+  for (const cat of Object.keys(DB).sort()) s.add(new Option(cat, cat));
+  p1loadSubs();
+}
+
+function p1loadSubs(selectNm){
+  const cat = $('p1cat').value;
+  const s   = $('p1item');
+  s.innerHTML = '';
+  for (const nm of Object.keys(DB[cat]).sort((a,b) => a.localeCompare(b, 'es'))) s.add(new Option(nm, nm));
+  $('p1itemFilter').value = '';
+  if (selectNm) s.value = selectNm;
+  syncTierDropdown();
+  p1preview();
+}
+
+/* Filtrar opciones del select de items */
+$('p1itemFilter').addEventListener('input', function(){
+  const q = norm(this.value);
+  const s = $('p1item');
+  for (const opt of s.options){
+    opt.style.display = (!q || norm(opt.value).includes(q)) ? '' : 'none';
+  }
+  if (s.selectedOptions[0]?.style.display === 'none') s.value = '';
+});
+
+/* Ajustar tier dropdown según el item seleccionado */
+function syncTierDropdown(){
+  const cat = $('p1cat').value, nm = $('p1item').value;
+  const tgt = $('p1tier');
+  const fixed = DB[cat] && DB[cat][nm] ? DB[cat][nm].tier : null;
+  const curVal = tgt.value;
+  tgt.innerHTML = '';
+  if (fixed){
+    tgt.add(new Option(fixed, fixed));
+    tgt.value = fixed;
+  } else {
+    for (const t of ['T1','T2','T3','T4','T5','T6','T7','T8']){
+      const o = new Option(t, t);
+      if (t === 'T4') o.selected = true;
+      tgt.add(o);
+    }
+    if ([...tgt.options].some(o => o.value === curVal)) tgt.value = curVal;
+  }
+}
+
+$('p1cat') .addEventListener('change', () => p1loadSubs());
+$('p1item').addEventListener('change', () => {
+  syncTierDropdown();
+  p1preview();
+});
+$('p1tier').addEventListener('change', () => p1preview());
+$('p1ench').addEventListener('change', () => p1preview());
+
+function p1preview(){
+  const cat = $('p1cat').value, nm = $('p1item').value;
+  if (!DB[cat] || !DB[cat][nm]){
+    setImg('p1img',''); tx('p1name','Selecciona ítem'); tx('p1id','—');
+    p1data = []; $('p1tw').style.display='none'; $('p1ftr').style.display='none';
+    hideAl('p1arb'); hideAl('p1scan'); $('p1tb').innerHTML=''; return;
+  }
+  CUR.p1 = { cat, nm, d: DB[cat][nm] };
+  const tier = $('p1tier').value, ench = $('p1ench').value;
+  const fid  = tier + DB[cat][nm].id + ench;
+  setImg('p1img', fid);
+  tx('p1name', tier + ' ' + nm);
+  tx('p1id', fid);
+  p1data = [];
+  $('p1tw').style.display = 'none';
+  $('p1ftr').style.display = 'none';
+  hideAl('p1arb'); hideAl('p1scan');
+  $('p1tb').innerHTML = '';
+}
+
+$('p1fetch').addEventListener('click', fetchP1);
+
+async function fetchP1(){
+  const item = CUR.p1;
+  if (!item){ showAl('p1scan','<strong>Selecciona un &#237;tem</strong> — Usa el buscador o las listas desplegables para elegir un art&#237;culo.','aw'); return; }
+  const tier = $('p1tier').value, ench = $('p1ench').value;
+  const fid  = tier + item.d.id + ench;
+  $('p1load').style.display = 'block';
+  $('p1tw')  .style.display = 'none';
+  hideAl('p1scan'); hideAl('p1arb');
+  try {
+    const data = await fetchPrices(fid, CITIES.join(','));
+    p1data = Array.isArray(data) ? data.filter(d => CITIES.includes(d.city)) : [];
+    updateP1Stats(p1data);
+    detectArb(p1data);
+    renderP1(p1data);
+    $('p1tw').style.display = 'block';
+    lastUpdate = new Date();
+    const ts = $('p1ts');
+    if (ts) ts.textContent = '· Última act. ' + lastUpdate.toLocaleTimeString('es-ES');
+    setTimeout(() => $('p1tw')?.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+  } catch(e) {
+    showAl('p1scan','<strong>Error de conexi&#243;n</strong> — No se pudieron obtener precios. Verifica tu conexi&#243;n a internet o intenta m&#225;s tarde.','ab');
+  } finally {
+    $('p1load').style.display = 'none';
+  }
+}
+
+function updateP1Stats(data){
+  const liq  = data.filter(d => d.sell_price_min > 0);
+  const bids = data.filter(d => d.buy_price_max  > 0);
+  if (liq.length){
+    tx('p1sv', N(Math.min(...liq.map(d => d.sell_price_min))));
+    const bc = liq.reduce((a,b) => b.sell_price_min < a.sell_price_min ? b : a);
+    tx('p1bc', bc.city);
+  }
+  if (bids.length) tx('p1bv', N(Math.max(...bids.map(d => d.buy_price_max))));
+  const sp = data.filter(d => d.sell_price_min>0 && d.buy_price_max>0).map(d => d.sell_price_min - d.buy_price_max);
+  if (sp.length) tx('p1sp', N(Math.max(...sp)));
+  tx('p1lq', liq.length + '/' + data.length + ' ciudades');
+}
+
+function detectArb(data){
+  const ws = data.filter(d => d.sell_price_min > 0);
+  const wb = data.filter(d => d.buy_price_max  > 0);
+  if (!ws.length || !wb.length){ hideAl('p1arb'); return; }
+  const minS = Math.min(...ws.map(d => d.sell_price_min));
+  const maxB = Math.max(...wb.map(d => d.buy_price_max));
+  if (maxB > minS){
+    const p   = maxB - minS;
+    const roi = ((p / minS) * 100).toFixed(1);
+    const cS  = ws.find(d => d.sell_price_min === minS)?.city;
+    const cB  = wb.find(d => d.buy_price_max  === maxB)?.city;
+    showAl('p1arb',
+      '&#128680; <strong>Arbitraje detectado:</strong> Compra en <strong>' + cS +
+      '</strong> a ' + N(minS) + ' &rarr; Vende en <strong>' + cB +
+      '</strong> a ' + N(maxB) + ' &mdash; Profit bruto: ' + N(p) +
+      ' (<strong>' + roi + '% ROI</strong> antes de impuesto)',
+      'ag');
+  } else { hideAl('p1arb'); }
+}
+
+function renderP1(data){
+  let rows = [...data];
+  if (p1filter === 'liq')   rows = rows.filter(d => d.sell_price_min>0 || d.buy_price_max>0);
+  else if (p1filter === 'fresh') rows = rows.filter(d => {
+    if (!d.sell_price_min_date || !d.sell_price_min) return false;
+    return (new Date() - new Date(d.sell_price_min_date)) / 60000 < 60;
+  });
+  else if (p1filter === 'spr'){
+    rows = rows.filter(d => d.sell_price_min>0 && d.buy_price_max>0);
+    rows.sort((a,b) => (b.sell_price_min-b.buy_price_max) - (a.sell_price_min-a.buy_price_max));
+  }
+  const minSells = rows.filter(d => d.sell_price_min>0).map(d => d.sell_price_min);
+  const gMin = minSells.length ? Math.min(...minSells) : Infinity;
+  const tbody = $('p1tb');
+  if (!rows.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:13px;color:var(--mut)">Sin datos con el filtro actual</td></tr>';
+    $('p1ftr').style.display = 'block';
+    return;
+  }
+  $('p1ftr').style.display = 'block';
+  tbody.innerHTML = rows.map(r => {
+    const sell = r.sell_price_min>0 ? '<span class="ps">'  +N(r.sell_price_min)+'</span>' : '<span style="color:var(--mut)">&#8212;</span>';
+    const buy  = r.buy_price_max >0 ? '<span class="pb2">'+N(r.buy_price_max) +'</span>' : '<span style="color:var(--mut)">&#8212;</span>';
+    let spr = '&#8212;';
+    if (r.sell_price_min>0 && r.buy_price_max>0)
+      spr = '<span class="pg">' + N(r.sell_price_min - r.buy_price_max) + '</span>';
+    let arb = '&#8212;';
+    if (r.buy_price_max>0 && gMin<Infinity && r.buy_price_max>gMin)
+      arb = '<span class="pg">' + ((r.buy_price_max-gMin)/gMin*100).toFixed(1) + '%</span>';
+    let badge = '<span class="bdg bst">Sin datos</span>';
+    if (r.sell_price_min>0 && r.sell_price_min_date){
+      const m = Math.round((new Date() - new Date(r.sell_price_min_date)) / 60000);
+      badge = '<span class="bdg ' + (m<60?'bfr':m<720?'bst':'bol') + '">' + (m<60?m+'m':Math.round(m/60)+'h') + '</span>';
+    }
+    return '<tr><td><strong>'+r.city+'</strong></td><td>'+sell+'</td><td>'+buy+'</td><td>'+spr+'</td><td>'+arb+'</td><td>'+badge+'</td></tr>';
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   TAB 2 — FLIPPING
+   FÓRMULA (acumulativa por niveles de encantamiento):
+   matCost  = Σ(lvl=1..target) matQty × precio_mat_lvl × cantidad
+   costTotal= precio.0 × cantidad + matCost
+   gross    = OC_destino × cantidad
+   setupFee = gross × 0.025               — Tasa Configuración 2.5%
+   taxAmt   = gross × tasa (4% premium | 8% normal)
+   netRev   = gross - setupFee - taxAmt
+   profit   = netRev - costTotal
+   ROI      = profit / costTotal × 100
+════════════════════════════════════════════════════ */
+$('fltier') .addEventListener('change', () => { flPreview(); flCalc(); });
+$('fletgt') .addEventListener('change', () => { flPreview(); flCalc(); });
+$('flp0')   .addEventListener('input',  () => flCalc());
+$('flpbm')  .addEventListener('input',  () => flCalc());
+$('flqty')  .addEventListener('input',  () => flCalc());
+$('flCalcBtn').addEventListener('click', () => flCalc());
+$('flLive')  .addEventListener('click', flFetch);
+
+function flPreview(){
+  const item = CUR.fl;
+  if (!item){ setImg('flimg',''); tx('flname','Selecciona ítem'); tx('flid','—'); return; }
+  const tier = $('fltier').value;
+  const fid  = tier + item.d.id;
+  setImg('flimg', fid);
+  tx('flname', tier + ' ' + item.nm);
+  tx('flid',   fid);
+  flRenderMats();
+}
+
+async function flFetch(){
+  const item = CUR.fl;
+  if (!item){ showAl('flal','Selecciona un &#237;tem primero usando el buscador.','aw'); return; }
+  const tier  = $('fltier').value;
+  const lvl   = parseInt($('fletgt').value);
+  const baseId= tier + item.d.id;
+  const enchId= tier + item.d.id + '@' + lvl;
+  const locs = 'Caerleon,Lymhurst,Martlock,Bridgewatch,Thetford,Fort Sterling,Brecilien';
+  const bmLocs = 'Black Market,Caerleon,Brecilien';
+  const matIds = [];
+  for (let i = 1; i <= lvl; i++) matIds.push(getMatIdForEnchant(i, tier));
+  $('flload').style.display = 'block';
+  try {
+    const [r1,r3,...rm] = await Promise.all([
+      fetchPrices(baseId, locs),
+      fetchPrices(enchId, bmLocs).catch(()=>[]),
+      ...matIds.map(id => fetchPrices(id, locs).catch(()=>[])),
+    ]);
+    const bRows = (r1||[]).filter(d => d.sell_price_min>0);
+    if (bRows.length) $('flp0').value = Math.min(...bRows.map(d=>d.sell_price_min));
+    const oRows = (r3||[]).filter(d=>d.buy_price_max>0);
+    if (oRows.length) $('flpbm').value = Math.max(...oRows.map(d=>d.buy_price_max));
+    else {
+      const sRows = (r3||[]).filter(d=>d.sell_price_min>0);
+      if (sRows.length) $('flpbm').value = Math.min(...sRows.map(d=>d.sell_price_min));
+    }
+    rm.forEach((res, idx) => {
+      const rows = (res||[]).filter(d=>d.sell_price_min>0);
+      if (rows.length) {
+        const inp = $('flmprice_' + (idx + 1));
+        if (inp) inp.value = Math.min(...rows.map(d=>d.sell_price_min));
+      }
+    });
+    flCalc();
+  } catch(e) {
+    showAl('flal','Error al consultar la API. Ingresa los precios manualmente.','ab');
+  } finally {
+    $('flload').style.display = 'none';
+  }
+}
+
+function flRenderMats() {
+  const enchLvl = parseInt($('fletgt').value) || 1;
+  const tier = $('fltier').value;
+  const item = CUR.fl;
+  if (!item) return;
+  const itemId = tier + item.d.id;
+  const matQtyPerItem = getEnchantQty(itemId);
+  const cont = $('flMatContainer');
+  if (!cont) return;
+  const oldVals = {};
+  for (let i = 1; i <= 4; i++) {
+    const inp = $('flmprice_' + i);
+    if (inp) oldVals[i] = inp.value;
+  }
+  cont.innerHTML = '';
+  for (let lvl = 1; lvl <= enchLvl; lvl++) {
+    const name = getMatName(lvl);
+    const row = document.createElement('div');
+    row.className = 'mr';
+    row.innerHTML =
+      '<div><div class="mrn">' + name + ' ' + tier + '</div><div class="mrq">Cant: <strong>' + matQtyPerItem + '</strong> / &#237;tem</div></div>' +
+      '<input type="number" id="flmprice_' + lvl + '" placeholder="Precio/u" min="0" style="font-family:var(--m)">' +
+      '<div class="mrt" id="flmtot_' + lvl + '">&#8212;</div>';
+    cont.appendChild(row);
+    const inp = $('flmprice_' + lvl);
+    if (inp) {
+      if (oldVals[lvl] !== undefined) inp.value = oldVals[lvl];
+      inp.addEventListener('input', () => flCalc());
+    }
+  }
+  flCalc();
+}
+
+function flCalc(){
+  const p0  = parseFloat($('flp0') .value) || 0;
+  const pbm = parseFloat($('flpbm').value) || 0;
+  const qty = parseInt  ($('flqty').value) || 1;
+
+  const enchLvl = parseInt($('fletgt').value) || 1;
+  const tier = $('fltier').value;
+  const item = CUR.fl;
+  const itemId = tier + (item?.d?.id || '');
+  const matQtyPerItem = getEnchantQty(itemId);
+
+  let matCost = 0;
+  for (let lvl = 1; lvl <= enchLvl; lvl++) {
+    const price = parseFloat($('flmprice_' + lvl)?.value) || 0;
+    const total = matQtyPerItem * price * qty;
+    matCost += total;
+    const tEl = $('flmtot_' + lvl);
+    if (tEl) tEl.textContent = total > 0 ? N(total) : '—';
+  }
+
+  const costWithoutMat = p0 * qty;
+  const costTotal = costWithoutMat + matCost;
+  const gross     = pbm * qty;
+  const setupFee  = gross * 0.025;
+  const netRev    = gross - setupFee;
+  const profit    = netRev - costTotal;
+  const roi       = costTotal > 0 ? (profit / costTotal) * 100 : 0;
+
+  if (p0===0 && pbm===0 && matCost===0){ $('flres').style.display='none'; $('flempty').style.display='block'; return; }
+  $('flempty').style.display='none';
+  $('flres')  .style.display='block';
+
+  tx('fb0',   N(costWithoutMat));
+  tx('fbmat', matCost > 0 ? '−'+N(matCost) : '—');
+  tx('fbtc',  N(costTotal));
+  tx('fbbm',  N(gross));
+  tx('fbsetup','−'+N(setupFee));
+  tx('fbnet', N(netRev));
+
+  const ok = profit >= 0;
+  tx('fri', N(costTotal));
+  $('frp') .textContent = Pr(profit);   $('frp') .className = 'rcv ' + (ok?'rp':'rl');
+  $('frr') .textContent = Pct(roi);     $('frr') .className = 'rcv ' + (ok?'rp':'rl');
+  $('frpu').textContent = Pr(profit/qty);$('frpu').className = 'rcv ' + (ok?'rp':'rl');
+
+  tx('fls0',  N(p0));
+  tx('flsbm', N(pbm));
+  $('flspp').textContent = Pr(profit/qty);
+  $('flspp').className   = 'stv ' + (ok?'vp':'vl');
+
+  setVerd('flverd', profit, roi, 15);
+  if (profit>0 && roi>15)  showAl('flal','&#9989; Flip rentable — ROI '+roi.toFixed(1)+'% · Profit neto: '+N(profit)+' plata','ag');
+  else if (profit>0)       showAl('flal','&#9888;&#65039; Margen bajo ('+roi.toFixed(1)+'%). Busca mejor OC en destino.','aw');
+  else                     showAl('flal','&#10060; Operación en pérdida: '+N(profit)+' plata. El precio enchantado no cubre costos.','ab');
+
+  flUpdateSuggestion();
+}
+
+function flUpdateSuggestion() {
+  const sug = $('flSug');
+  if (!sug) return;
+  const item = CUR.fl;
+  const enchLvl = parseInt($('fletgt').value) || 1;
+  const qty = parseInt($('flqty').value) || 1;
+  const tier = $('fltier').value;
+  if (!item) { sug.style.display = 'none'; return; }
+  const itemId = tier + item.d.id;
+  const matQtyPerItem = getEnchantQty(itemId);
+
+  const names = ['Runas', 'Almas', 'Reliquias', 'Fragmentos Avalonianos'];
+  let parts = [];
+  let totalMats = 0;
+  let totalSilver = 0;
+  for (let lvl = 1; lvl <= enchLvl; lvl++) {
+    const need = matQtyPerItem * qty;
+    totalMats += need;
+    const price = parseFloat($('flmprice_' + lvl)?.value) || 0;
+    totalSilver += need * price;
+    const perUnit = price > 0 ? ' (' + N(price) + '/u)' : '';
+    parts.push(names[lvl - 1] + ' ' + tier + ': ' + N(need) + ' uds' + perUnit);
+  }
+  if (parts.length > 0) {
+    let html = '📦 <strong>Compra:</strong> ' + parts.join('  ·  ');
+    html += ' — <strong>Total: ' + N(totalMats) + ' uds</strong>';
+    if (totalSilver > 0) html += ' · <strong>Costo: ' + N(totalSilver) + ' plata</strong>';
+    sug.innerHTML = html;
+    sug.style.display = 'block';
+  } else {
+    sug.style.display = 'none';
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   TAB 3 — RUTAS
+   FÓRMULA:
+   inv     = compra × qty
+   gross   = venta × qty
+   taxAmt  = gross × tasa
+   profit  = gross - taxAmt - inv - viaje
+   ROI     = profit / inv × 100
+   Peso    = kg_por_unidad × qty → montura recomendada
+════════════════════════════════════════════════════ */
+$('rttier')   .addEventListener('change', () => rtPreview());
+$('rtench')   .addEventListener('change', () => rtPreview());
+$('rtbuy')    .addEventListener('input',  () => rtCalc());
+$('rtsell')   .addEventListener('input',  () => rtCalc());
+$('rtqty')    .addEventListener('input',  () => rtCalc());
+$('rttrv')    .addEventListener('input',  () => rtCalc());
+$('rtwpu')    .addEventListener('input',  () => rtCalc());
+$('rtCalcBtn').addEventListener('click',  () => rtCalc());
+$('rtLive')   .addEventListener('click',  rtFetch);
+
+function rtPreview(){
+  const item = CUR.rt;
+  if (!item){ setImg('rtimg',''); tx('rtname','—'); tx('rtid','—'); return; }
+  const tier = $('rttier').value, ench = $('rtench').value;
+  const fid  = tier + item.d.id + ench;
+  setImg('rtimg', fid);
+  tx('rtname', tier+' '+item.nm);
+  tx('rtid',   fid);
+}
+
+async function rtFetch(){
+  const item = CUR.rt;
+  if (!item){ showAl('rtal','Selecciona un &#237;tem primero usando el buscador.','aw'); return; }
+  const tier = $('rttier').value, ench = $('rtench').value;
+  const orig = $('rtorig').value, dest = $('rtdest').value;
+  const fid  = tier + item.d.id + ench;
+  $('rtload').style.display = 'block';
+  try {
+    const data = await fetchPrices(fid, orig+','+dest);
+    const dataArr = Array.isArray(data) ? data : [];
+    const od = dataArr.find(d => d.city===orig);
+    const dd = dataArr.find(d => d.city===dest);
+    if (od?.sell_price_min>0) $('rtbuy') .value = od.sell_price_min;
+    if (dd?.buy_price_max >0) $('rtsell').value = dd.buy_price_max;
+    else if (dd?.sell_price_min>0) $('rtsell').value = dd.sell_price_min;
+    rtCalc();
+  } catch(e) {
+    showAl('rtal','Error al consultar la API. Ingresa los precios manualmente.','ab');
+  } finally {
+    $('rtload').style.display = 'none';
+  }
+}
+
+function rtCalc(){
+  const buy    = parseFloat($('rtbuy') .value) || 0;
+  const sell   = parseFloat($('rtsell').value) || 0;
+  const qty    = parseInt  ($('rtqty') .value) || 1;
+  const tax    = tgIdx('rtprem')===0 ? 0.04 : 0.08;
+  const travel = parseFloat($('rttrv') .value) || 0;
+  const wpu    = parseFloat($('rtwpu') .value) || 0;
+  const orig   = $('rtorig').value;
+  const dest   = $('rtdest').value;
+
+  const inv    = buy  * qty;
+  const gross  = sell * qty;
+  const taxAmt = gross * tax;
+  const netRev = gross - taxAmt;
+  const profit = netRev - inv - travel;
+  const roi    = inv > 0 ? (profit / inv) * 100 : 0;
+  const totalW = wpu * qty;
+
+  if (buy===0 && sell===0){ $('rtres').style.display='none'; $('rtempty').style.display='block'; return; }
+  $('rtempty').style.display='none';
+  $('rtres')  .style.display='block';
+
+  tx('rbuy',  N(buy)+'×'+qty+' = '+N(inv));
+  tx('rsell', N(sell)+'×'+qty+' = '+N(gross));
+  tx('rtax',  '−'+N(taxAmt)+' ('+(tax*100).toFixed(0)+'%)');
+  tx('rtrv2', travel>0 ? '−'+N(travel) : '—');
+
+  const ok = profit >= 0;
+  tx('rri', N(inv));
+  $('rrp') .textContent = Pr(profit);    $('rrp') .className = 'rcv '+(ok?'rp':'rl');
+  $('rrr') .textContent = Pct(roi);      $('rrr') .className = 'rcv '+(ok?'rp':'rl');
+  $('rrpu').textContent = Pr(profit/qty);$('rrpu').className = 'rcv '+(ok?'rp':'rl');
+
+  tx('rtruta', orig+' → '+dest);
+  $('rtppu').textContent = Pr(profit/qty); $('rtppu').className = 'stv '+(ok?'vp':'vl');
+  $('rtroi').textContent = Pct(roi);       $('rtroi').className = 'stv '+(ok?'vp':'vl');
+
+  /* Peso y montura */
+  if (totalW > 0){
+    tx('rtwt', totalW.toFixed(1)+' kg');
+    const mnt = getMnt(totalW);
+    tx('rtmnt', mnt.name);
+    const wa = $('rtwtal');
+    wa.className = 'al show '+mnt.cls;
+    wa.innerHTML = '&#9878; Peso total: <strong>'+totalW.toFixed(1)+' kg</strong> — Usa <strong>'+mnt.name+'</strong>. '+mnt.note;
+  } else {
+    tx('rtwt','—'); tx('rtmnt','—'); $('rtwtal').className='al';
+  }
+
+  setVerd('rtverd', profit, roi, 15);
+  if (profit>0 && roi>15)  showAl('rtal','&#9989; Ruta rentable — ROI '+roi.toFixed(1)+'% · Profit neto: '+N(profit)+' plata','ag');
+  else if (profit>0)       showAl('rtal','&#9888;&#65039; Margen bajo ('+roi.toFixed(1)+'%). Considera más cantidad o mejor spread.','aw');
+  else                     showAl('rtal','&#10060; Ruta en pérdida: '+N(profit)+' plata. Precio destino insuficiente.','ab');
+}
+
+/* Tabla de monturas oficial de Albion Online */
+function getMnt(kg){
+  if (kg<=862)  return {name:'Caballo T3 (máx 862 kg)',        note:'Carga ligera. ✓',                    cls:'ag'};
+  if (kg<=987)  return {name:'Caballo T4 (máx 987 kg)',        note:'Carga media.',                        cls:'ag'};
+  if (kg<=1387) return {name:'Caballo T5 (máx 1.387 kg)',      note:'Carga elevada.',                      cls:'aw'};
+  if (kg<=1562) return {name:'Buey T3 (máx 1.562 kg)',         note:'Cambia a buey. Usa rutas seguras.',   cls:'aw'};
+  if (kg<=2187) return {name:'Buey T4 (máx 2.187 kg)',         note:'Alta exposición PvP.',                cls:'aw'};
+  if (kg<=2812) return {name:'Buey T5 (máx 2.812 kg)',         note:'Solo rutas con escolta.',             cls:'ab'};
+  if (kg<=3437) return {name:'Buey T6 / Jabalí T8 (máx 3.437 kg)',note:'Escolta obligatoria.',            cls:'ab'};
+  return         {name:'Grizzly T8 (máx 5.937 kg)',            note:'Solo zonas azules.',                  cls:'ab'};
+}
+
+/* ════════════════════════════════════════════════════
+   TAB 4 — CRAFTEO
+   ¿Cómo ganar plata crafteando?
+   Compras materiales refinados → crafteas en ciudad con bono →
+   la RRA te devuelve materiales (reduces costo real) →
+   vendes el ítem → si venta > break-even → GANANCIA
+
+   FÓRMULA:
+   grossMat  = suma(precioMat × qty_mat)       — por 1 run
+   rraSave   = grossMat × rra                  — devuelto por el juego
+   netMat    = grossMat − rraSave              — costo real por run
+   nutrTot   = nutricion × qty                 — total nutrición
+   costTotal = netMat × qty + nutrTot          — inversión total
+   gross     = sellPrice × qty
+   taxAmt    = gross × tax
+   profit    = gross − taxAmt − costTotal
+   margin    = profit / costTotal × 100
+   breakEven = costTotal / (qty × (1−tax))     — precio mínimo de venta
+════════════════════════════════════════════════════ */
+$('crtier')  .addEventListener('change', () => { crPreview(); crMats(); });
+$('crench')  .addEventListener('change', () => crPreview());
+$('crcity')  .addEventListener('change', () => crRRA());
+$('crqty')   .addEventListener('input',  () => crCalc());
+$('crnutr')  .addEventListener('input',  () => crCalc());
+$('crprice') .addEventListener('input',  () => crCalc());
+$('crfocus') .addEventListener('change', () => { crRRA(); crCalc(); });
+$('crCalcBtn').addEventListener('click', () => crCalc());
+$('crLive')   .addEventListener('click', crFetch);
+
+/* IDs de API para materiales refinados */
+const CR_IDS = { bar:'_METALBAR', plk:'_PLANKS', clt:'_CLOTH', lth:'_LEATHER' };
+async function crFetch(){
+  const item = CUR.cr;
+  if (!item){ showAl('cral','Selecciona un &#237;tem primero usando el buscador.','aw'); return; }
+  const tier  = $('crtier').value;
+  const tierN = parseInt(tier.replace('T',''));
+  const mt    = item.d.mat || 'metal';
+  const mats  = CM[mt] || CM['metal'];
+  const locs  = 'Lymhurst,Martlock,Bridgewatch,Thetford,Fort Sterling,Caerleon,Brecilien';
+  $('crload').style.display = 'block';
+  try {
+    const results = await Promise.all(mats.map(m => {
+      const id = 'T' + tierN + (CR_IDS[m.key] || '');
+      return fetchPrices(id, locs).catch(() => []);
+    }));
+    mats.forEach((m, i) => {
+      const rows = (results[i]||[]).filter(d => d.sell_price_min > 0);
+      const inp  = $('cm_'+m.key);
+      if (inp && rows.length) inp.value = Math.min(...rows.map(d=>d.sell_price_min));
+    });
+    crCalc();
+    showAl('cral','&#9989; Precios de materiales cargados desde la API.','ag');
+  } catch(e) {
+    showAl('cral','Error al consultar la API. Ingresa los precios manualmente.','ab');
+  } finally {
+    $('crload').style.display = 'none';
+  }
+}
+
+function crPreview(){
+  const item = CUR.cr;
+  if (!item){ setImg('crimg',''); tx('crname','Selecciona ítem'); tx('crid','—'); return; }
+  const tier = $('crtier').value, ench = $('crench').value;
+  const fid  = tier + item.d.id + ench;
+  setImg('crimg', fid);
+  tx('crname', tier+' '+item.nm);
+  tx('crid',   fid);
+}
+
+function crRRA(){
+  const city  = $('crcity').value;
+  const focus = $('crfocus').checked;
+  const mat   = CUR.cr?.d?.mat || 'metal';
+  const cb    = CBONUS[city] || [];
+  const hasBon= cb.includes(mat) || cb.includes('all') || city==='Brecilien';
+  let rate, hint;
+  if (!hasBon){
+    rate = RRA.base;
+    hint = 'RRA: '+(rate*100).toFixed(1)+'% — '+city+' no tiene bono para este material';
+  } else if (!focus){
+    rate = RRA.bonus;
+    hint = 'RRA: '+(rate*100).toFixed(1)+'% — Ciudad bonificada, sin foco';
+  } else {
+    rate = RRA.focus;
+    hint = 'RRA: '+(rate*100).toFixed(1)+'% — Ciudad bonificada + Foco activo';
+  }
+  ih('crrhint', hint);
+  return rate;
+}
+
+function crMats(){
+  const tier  = $('crtier').value;
+  const tierN = parseInt(tier.replace('T',''));
+  const mult  = Math.pow(2, tierN-4);       /* T4=1× T5=2× T6=4× T7=8× T8=16× */
+  const mt    = CUR.cr?.d?.mat || 'metal';
+  const mats  = CM[mt] || CM['metal'];
+  const cont  = $('crml');
+  /* Preservar precios ingresados antes de destruir inputs */
+  const oldVals = {};
+  mats.forEach(m => {
+    const old = $('cm_'+m.key);
+    if (old) oldVals[m.key] = old.value;
+  });
+  cont.innerHTML = '';
+  mats.forEach(m => {
+    const qty = m.base * mult;
+    const row = document.createElement('div');
+    row.className = 'mr';
+    row.innerHTML =
+      '<div><div class="mrn">'+m.name+'</div><div class="mrq">Cantidad: <strong>'+qty+'</strong></div></div>'+
+      '<input type="number" id="cm_'+m.key+'" placeholder="Precio/u" min="0">'+
+      '<div class="mrt" id="ct_'+m.key+'">&#8212;</div>';
+    cont.appendChild(row);
+    /* Restaurar valor anterior si existe */
+    const inp = $('cm_'+m.key);
+    if (inp && oldVals[m.key] !== undefined) inp.value = oldVals[m.key];
+  });
+  /* Adjuntar listeners a los inputs recién creados */
+  mats.forEach(m => {
+    const inp = $('cm_'+m.key);
+    if (inp) inp.addEventListener('input', () => crCalc());
+  });
+  /* Ocultar resultado viejo si todos los inputs están vacíos */
+  const hasAny = mats.some(m => {
+    const inp = $('cm_'+m.key);
+    return inp && parseFloat(inp.value) > 0;
+  });
+  if (!hasAny || !parseFloat($('crprice').value)){
+    $('crres').style.display = 'none';
+    $('crempty').style.display = 'block';
+  }
+  crCalc();
+}
+
+function crCalc(){
+  const tier  = $('crtier').value;
+  const tierN = parseInt(tier.replace('T',''));
+  const mult  = Math.pow(2, tierN-4);
+  const mt    = CUR.cr?.d?.mat || 'metal';
+  const mats  = CM[mt] || CM['metal'];
+  const rra   = crRRA();
+  const nutr  = parseFloat($('crnutr') .value) || 0;
+  const qty   = parseInt  ($('crqty')  .value) || 1;
+  const sellP = parseFloat($('crprice').value) || 0;
+  const tax   = tgIdx('crtax')===0 ? 0.04 : 0.08;
+
+  let grossMat = 0;
+  mats.forEach(m => {
+    const realQty = m.base * mult;
+    const inp     = $('cm_'+m.key);
+    if (!inp) return;
+    const up  = parseFloat(inp.value) || 0;
+    const tot = up * realQty;
+    grossMat += tot;
+    const te = $('ct_'+m.key);
+    if (te) te.textContent = tot>0 ? N(tot) : '—';
+  });
+
+  const rraSave   = grossMat * rra;
+  const netMat    = grossMat - rraSave;
+  const nutrTot   = nutr * qty;
+  const costTotal = netMat * qty + nutrTot;
+  const gross     = sellP * qty;
+  const taxAmt    = gross * tax;
+  const netRev    = gross - taxAmt;
+  const profit    = netRev - costTotal;
+  const margin    = costTotal>0 ? (profit/costTotal)*100 : 0;
+  const breakEven = qty>0 ? costTotal/(qty*(1-tax)) : 0;
+
+  if (grossMat===0 && sellP===0){ $('crres').style.display='none'; $('crempty').style.display='block'; return; }
+  $('crempty').style.display='none';
+  $('crres')  .style.display='block';
+
+  tx('cbgross', N(grossMat*qty));
+  tx('cbrra',   (rra*100).toFixed(1)+'%');
+  tx('cbsave',  '+'+N(rraSave*qty));
+  tx('cbnmat',  N(netMat*qty));
+  tx('cbnutr',  '−'+N(nutrTot));
+  tx('cbtax',   '−'+N(taxAmt));
+  tx('cbnet',   N(netRev));
+
+  const ok = profit >= 0;
+  tx('crrc', N(costTotal));
+  $('crrp').textContent = Pr(profit);    $('crrp').className = 'rcv '+(ok?'rp':'rl');
+  $('crrm').textContent = Pct(margin);   $('crrm').className = 'rcv '+(ok?'rp':'rl');
+  tx('crrb', N(breakEven));
+
+  tx('crsm',    N(grossMat*qty));
+  tx('crsrra',  (rra*100).toFixed(1)+'%');
+  tx('crssave', '+'+N(rraSave*qty));
+  $('crsp').textContent = Pr(profit);    $('crsp').className = 'stv '+(ok?'vp':'vl');
+  tx('crsbe', N(breakEven));
+
+  setVerd('crverd', profit, margin, 20);
+  if (profit>0 && margin>20)  showAl('cral','&#9989; Producción rentable — Margen '+margin.toFixed(1)+'% · Profit: '+N(profit)+' plata · Break-even: '+N(breakEven),'ag');
+  else if (profit>0)          showAl('cral','&#9888;&#65039; Margen bajo ('+margin.toFixed(1)+'%). Activa Foco o elige ciudad con bono para mejorar la RRA.','aw');
+  else if (sellP>0)           showAl('cral','&#10060; Producción en pérdida. Break-even: '+N(breakEven)+' plata. Sube el precio de venta o reduce materiales.','ab');
+  else                        showAl('cral','&#128161; Ingresa un precio de venta estimado para calcular el profit.','aw');
+
+  crUpdateSuggestion();
+}
+
+function crUpdateSuggestion() {
+  const sug = $('crSug');
+  if (!sug) return;
+  const tier  = $('crtier').value;
+  const tierN = parseInt(tier.replace('T',''));
+  const mult  = Math.pow(2, tierN-4);
+  const mt    = CUR.cr?.d?.mat || 'metal';
+  const mats  = CM[mt] || CM['metal'];
+  const qty   = parseInt($('crqty').value) || 1;
+
+  let parts = [];
+  let totalCost = 0;
+  mats.forEach(m => {
+    const realQty = m.base * mult * qty;
+    const inp = $('cm_' + m.key);
+    const up = inp ? (parseFloat(inp.value) || 0) : 0;
+    if (up > 0) {
+      totalCost += realQty * up;
+      parts.push(m.name + ': ' + N(realQty) + ' × ' + N(up) + ' = ' + N(realQty * up));
+    } else {
+      parts.push(m.name + ': ' + N(realQty) + ' uds');
+    }
+  });
+
+  let html = '📦 <strong>Materiales:</strong> ' + parts.join('  ·  ');
+  if (totalCost > 0) html += ' — <strong>Costo total: ' + N(totalCost) + ' plata</strong>';
+  sug.innerHTML = html;
+  sug.style.display = 'block';
+}
+
+
+
+
+
+
+/* ════ VEREDICTO VISUAL ════ */
+function setVerd(elId, profit, pct, threshold=10){
+  const el = $(elId);
+  if (!el) return;
+  if (profit>0 && pct>threshold){
+    el.className = 'verd show v-win';
+    el.textContent = 'GANANCIA: +'+N(profit)+' plata ('+pct.toFixed(1)+'%)';
+  } else if (profit>0){
+    el.className = 'verd show v-warn';
+    el.textContent = 'MARGEN BAJO: +'+N(profit)+' ('+pct.toFixed(1)+'%)';
+  } else {
+    el.className = 'verd show v-lose';
+    el.textContent = 'PERDIDA: '+N(profit)+' ('+pct.toFixed(1)+'%)';
+  }
+}
+
+
+
+
+
+/* ════════════════════════════════════════════════════
+   TAB 0 — ASESOR DE INVERSIÓN INTELIGENTE
+   Escanea 4 estrategias y recomienda la mejor inversión
+════════════════════════════════════════════════════ */
+/* ════ INICIALIZACIÓN ════ */
+window.addEventListener('load', function(){
+  initCats();
+  crMats();
+  /* Imágenes de preview inicial */
+  setImg('p1img', 'T4_HEAD_CLOTH_SET1');
+  setImg('flimg', 'T4_MAIN_FIRESTAFF');
+  setImg('rtimg', 'T4_2H_FIRESTAFF');
+  setImg('crimg', 'T4_HEAD_CLOTH_SET1');
+  /* Dark mode */
+  function applyDM(on){
+    document.documentElement.classList.toggle('dark', on);
+    $('dmBtn').textContent = on ? '☀️' : '🌙';
+    try{ localStorage.setItem('amt_dark', on ? '1' : ''); }catch(e){}
+  }
+  try{ applyDM(localStorage.getItem('amt_dark') === '1'); }catch(e){}
+  $('dmBtn').addEventListener('click', () => {
+    applyDM(!document.documentElement.classList.contains('dark'));
+  });
+  /* Header logo → home */
+  document.querySelectorAll('.h-home').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+      $('T0').classList.add('on');
+      closeAllAC();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+  /* Home page: hero button → T1 */
+  const heroBtn = $('heroGo');
+  if (heroBtn) heroBtn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+    $('T1').classList.add('on');
+    document.querySelector('.ni[data-tab="T1"]')?.classList.add('on');
+    closeAllAC();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+  /* Home page: feature cards */
+  document.querySelectorAll('.h-card').forEach(card => {
+    card.addEventListener('click', function(){
+      const tab = this.dataset.tab;
+      if (!tab) return;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+      $(tab).classList.add('on');
+      document.querySelector('.ni[data-tab="'+tab+'"]')?.classList.add('on');
+      closeAllAC();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+});
+
+  /* Footer toggle */
+  document.querySelectorAll('.hf-hdr').forEach(hdr => {
+    hdr.addEventListener('click', function(){
+      this.parentElement.classList.toggle('open');
+    });
+  });
+});
+
+/* Útil: crear elemento con clase */
+function cE(tag, cls){ const el=document.createElement(tag); if(cls)el.className=cls; return el; }
+
+</script>
+</body>
+</html>
